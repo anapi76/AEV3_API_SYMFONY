@@ -1,0 +1,28 @@
+version: "3.7"
+services:
+  server-php:
+    container_name: servidor_barjuan
+    build:
+      dockerfile: Dockerfile
+      context: .
+    restart: unless-stopped
+    volumes:
+      - .:/www/html
+    stdin_open: true
+    links:
+      - mariadb-server
+    ports:
+      - 8005:8000
+  mariadb-server:
+    container_name: db_barjuan
+    image: mariadb
+    ports:
+      - 6604:3306
+    restart: unless-stopped
+    environment:
+      MYSQL_USER: root
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: barjuan
+    volumes:
+      - ./config/db_mysql/:/var/lib/mysql
+
