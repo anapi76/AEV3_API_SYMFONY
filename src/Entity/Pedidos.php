@@ -24,7 +24,7 @@ class Pedidos
     private ?string $detalles = null;
 
     #[ORM\Column(name: 'estado', options: ['default' => true])]
-    private ?bool $estado = null;
+    private ?bool $estado = true;
 
     #[ORM\ManyToOne(inversedBy: 'pedidos')]
     #[ORM\JoinColumn(name: 'idProveedor', referencedColumnName: 'idProveedor',nullable: false)]

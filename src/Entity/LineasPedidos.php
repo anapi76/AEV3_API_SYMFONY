@@ -19,7 +19,7 @@ class LineasPedidos
     private ?string $cantidad = null;
 
     #[ORM\Column(options:['default'=>false])]
-    private ?bool $entregado = null;
+    private ?bool $entregado = false;
 
     #[ORM\ManyToOne(inversedBy: 'lineasPedidos')]
     #[ORM\JoinColumn(name: 'idPedido', referencedColumnName: 'idPedidos',nullable: false)]

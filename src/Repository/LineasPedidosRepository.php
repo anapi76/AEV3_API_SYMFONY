@@ -21,6 +21,17 @@ class LineasPedidosRepository extends ServiceEntityRepository
         parent::__construct($registry, LineasPedidos::class);
     }
 
+    public function persist(LineasPedidos $lineasPedido):void{
+        $this->getEntityManager()->persist($lineasPedido);
+    }
+
+    public function save(bool $flush = false): void
+    {
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
 //    /**
 //     * @return LineasPedidos[] Returns an array of LineasPedidos objects
 //     */

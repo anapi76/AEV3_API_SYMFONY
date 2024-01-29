@@ -17,10 +17,10 @@ class Proveedores
     #[ORM\Column(name: 'idProveedor')]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255,unique:true)]
+    #[ORM\Column(length: 255, unique: true)]
     private ?string $nombre = null;
 
-    #[ORM\Column(length: 9, unique:true)]
+    #[ORM\Column(length: 9, unique: true)]
     private ?string $cif = null;
 
     #[ORM\Column(type: Types::TEXT)]
