@@ -16,26 +16,21 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
+#[Route('/pedido')]
 class PedidosController extends AbstractController
 {
-    #[Route('/pedidos', name: 'app_pedidos')]
-    public function index(PedidosRepository $pedidosRepository)/* : JsonResponse */
-    {
-        $data = $pedidosRepository->findAll();
-        dump($data);
-    }
-
-    #[Route('/pedido', name: 'app_pedido', methods: ['POST'])]
-    public function new(Request $request, ProveedoresRepository $proveedoresRepository,ProductosRepository $productosRepository, PedidosRepository $pedidosRepository,LineasPedidosRepository $lineasPedidoRepository): JsonResponse
+    #[Route('/', name: 'app_pedido', methods: ['POST'])]
+    public function add(Request $request, ProveedoresRepository $proveedoresRepository,ProductosRepository $productosRepository, PedidosRepository $pedidosRepository,LineasPedidosRepository $lineasPedidoRepository): JsonResponse
     {
         try {
             // Decodifico el contenido de la petición http
             $data = json_decode($request->getContent());
             if (!is_null($data)) {
                 $proveedor = $proveedoresRepository->findOneBy(['nombre' => $data->proveedor]);
-                if (isset($proveedor) && !empty($proveedor)) {
+                if ((isset($proveedor) && !empty($proveedor))&&(isset($data->fecha) && !empty($data->fecha))) {
                     $pedido = new Pedidos();
-                    $pedido->setFecha(new DateTime());
+                    $fecha=new DateTime($data->fecha);
+                    $pedido->setFecha($fecha);
                     $pedido->setProveedor($proveedor);
                     if (isset($data->detalles) && !empty($data->detalles)) {
                         $pedido->setDetalles($data->detalles);
@@ -61,9 +56,9 @@ class PedidosController extends AbstractController
                     if($cont>0){
                         $pedidosRepository->save(true);
                         if ($pedidosRepository->testInsert($pedido)) {
-                            return new JsonResponse(['status' => 'Pedido insertado correctamente'], Response::HTTP_CREATED);
+                            return new JsonResponse(['status' => 'Pedido creado correctamente'], Response::HTTP_CREATED);
                         } else {
-                            return new JsonResponse(['status' => 'El pedido no se ha insertado'], Response::HTTP_BAD_REQUEST);
+                            return new JsonResponse(['status' => 'El pedido no se ha creado'], Response::HTTP_BAD_REQUEST);
                         }
                     }
                 } else {
@@ -77,11 +72,12 @@ class PedidosController extends AbstractController
             return new JsonResponse(['status' => $msg], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
-}
+} 
 /*
 {
     "proveedor": "Proveedor1",
-    "detalle": "detalle1",
+    "fecha":"01-01-24",
+    "detalles": "detalle1",
     "productos": [
         {"nombre": "Producto1", "cantidad": 10},
         {"nombre": "Producto2", "cantidad": 15}

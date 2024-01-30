@@ -3,7 +3,10 @@
 namespace App\Repository;
 
 use App\Entity\LineasPedidos;
+use App\Entity\Pedidos;
+use App\Entity\Productos;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -23,13 +26,6 @@ class LineasPedidosRepository extends ServiceEntityRepository
 
     public function persist(LineasPedidos $lineasPedido):void{
         $this->getEntityManager()->persist($lineasPedido);
-    }
-
-    public function save(bool $flush = false): void
-    {
-        if ($flush) {
-            $this->getEntityManager()->flush();
-        }
     }
 
 //    /**

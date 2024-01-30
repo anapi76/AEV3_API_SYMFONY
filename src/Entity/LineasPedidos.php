@@ -16,7 +16,7 @@ class LineasPedidos
     private ?int $id = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 8, scale: 2)]
-    private ?string $cantidad = null;
+    private ?float $cantidad = null;
 
     #[ORM\Column(options:['default'=>false])]
     private ?bool $entregado = false;

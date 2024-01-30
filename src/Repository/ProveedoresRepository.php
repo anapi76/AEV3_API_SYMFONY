@@ -36,8 +36,7 @@ class ProveedoresRepository extends ServiceEntityRepository
                     'DIRECCION' => $proveedor->getDireccion(),
                     'TELEFONO' => $proveedor->getTelefono(),
                     'EMAIL' => $proveedor->getEmail(),
-                    'CONTACTO' => $proveedor->getContacto(),
-                    'PEDIDOS'=>$this->pedidosJSON($proveedor->getPedidos())
+                    'CONTACTO' => $proveedor->getContacto()
                 );
             }
             return $json;
@@ -56,35 +55,79 @@ class ProveedoresRepository extends ServiceEntityRepository
                 'DIRECCION' => $proveedor->getDireccion(),
                 'TELEFONO' => $proveedor->getTelefono(),
                 'EMAIL' => $proveedor->getEmail(),
-                'CONTACTO' => $proveedor->getContacto(),
-                'PEDIDOS'=>$this->pedidosJSON($proveedor->getPedidos())
+                'CONTACTO' => $proveedor->getContacto()
             );
         }
         return $json;
     }
 
-    public function pedidosJSON(Collection $pedidos): mixed
+    public function new(string $nombre, string $cif, string $direccion, ?int $telefono, ?string $email, ?string $contacto): void
     {
-        if (is_null($pedidos)) {
-            return null;
-        } else {
-            $json = array();
-            foreach($pedidos as $pedido){
-                $estado=($pedido->isEstado())?'Creado':'Entregado';
-                $json[$pedido->getId()] = array(
-                    'PROVEEDOR' => $pedido->getProveedor()->getNombre(),
-                    'FECHA' => $pedido->getFecha(),
-                    'DETALLES' => $pedido->getDetalles(),
-                    'ESTADO' => $estado
-                );
-            }
-        }
-        return $json;
+        $proveedor = new Proveedores();
+        $proveedor->setNombre($nombre);
+        $proveedor->setCif($cif);
+        $proveedor->setDireccion($direccion);
+        if(!is_null($telefono)) $proveedor->setTelefono($telefono);
+        if(!is_null($email)) $proveedor->setEmail($email);
+        if(!is_null($contacto)) $proveedor->setContacto($contacto);
+        $this->save($proveedor,true);
+    }
+
+    public function update(Proveedores $proveedor, ?string $nuevoNombre, ?string $cif, ?string $direccion, ?int $telefono, ?string $email, ?string $contacto): void
+    {
+        if(!is_null($nuevoNombre))$proveedor->setNombre($nuevoNombre);
+        if(!is_null($cif))$proveedor->setCif($cif);
+        if(!is_null($direccion))$proveedor->setDireccion($direccion);
+        if(!is_null($telefono)) $proveedor->setTelefono($telefono);
+        if(!is_null($email)) $proveedor->setEmail($email);
+        if(!is_null($contacto)) $proveedor->setContacto($contacto);
+        $this->save($proveedor,true);
     }
 
 
+    public function save(Proveedores $proveedor, bool $flush = false): void
+    {
+        $this->getEntityManager()->persist($proveedor);
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
 
+    public function remove(Proveedores $proveedor, bool $flush = false): void
+    {
+        $this->getEntityManager()->remove($proveedor);
 
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
+    public function testInsert(?string $nombre): bool
+    {
+        if (is_null($nombre) || empty($nombre)) {
+            return false;
+        } else {
+            $entidad = $this->findOneBy(['nombre'=>$nombre]);
+            if (is_null($entidad))
+                return false;
+            else {
+                return true;
+            }
+        }
+    }
+    public function testDelete(Proveedores $proveedor): bool
+    {
+        if (is_null($proveedor) ) {
+            return false;
+        } else {
+            $entidad = $this->find($proveedor);
+            if (is_null($entidad))
+                return true;
+            else {
+                return false;
+            }
+        }
+    }
 
 
     //    /**
