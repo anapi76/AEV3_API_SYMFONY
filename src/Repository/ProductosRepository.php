@@ -21,28 +21,84 @@ class ProductosRepository extends ServiceEntityRepository
         parent::__construct($registry, Productos::class);
     }
 
-//    /**
-//     * @return Productos[] Returns an array of Productos objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('p')
-//            ->andWhere('p.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('p.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    public function productosAllJSON(): mixed
+    {
+        $productos = $this->findAll();
+        if (empty($productos)) {
+            return null;
+        } else {
+            $json = array();
+            foreach ($productos as $producto) {
+                $json[$producto->getId()] = array(
+                    'NOMBRE' => $producto->getNombre(),
+                    'DESCRIPCION' => $producto->getDescripcion(),
+                    'PRECIO' => $producto->getPrecio()
+                );
+            }
+            return $json;
+        }
+    }
 
-//    public function findOneBySomeField($value): ?Productos
-//    {
-//        return $this->createQueryBuilder('p')
-//            ->andWhere('p.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    public function productoJSON(Productos $producto): mixed
+    {
+            $json = array();
+            $json[$producto->getId()] = array(
+                'NOMBRE' => $producto->getNombre(),
+                'DESCRIPCION' => $producto->getDescripcion(),
+                'PRECIO' => $producto->getPrecio()
+            );
+        
+        return $json;
+    }
+
+    public function new(string $nombre, float $precio, ?string $descripcion): bool
+    {
+        try {
+            $producto = new Productos();
+            $producto->setNombre($nombre);
+            $producto->setPrecio($precio);
+            if (!is_null($descripcion)) $producto->setDescripcion($descripcion);
+            $this->save($producto);
+            return true;
+        } catch (\Exception $e) {
+            return false; // Indica que la inserción falló
+        }
+    }
+
+    public function save(Productos $producto): void
+    {
+        try {
+            $this->getEntityManager()->persist($producto);
+            $this->getEntityManager()->flush();
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
+
+
+    //    /**
+    //     * @return Productos[] Returns an array of Productos objects
+    //     */
+    //    public function findByExampleField($value): array
+    //    {
+    //        return $this->createQueryBuilder('p')
+    //            ->andWhere('p.exampleField = :val')
+    //            ->setParameter('val', $value)
+    //            ->orderBy('p.id', 'ASC')
+    //            ->setMaxResults(10)
+    //            ->getQuery()
+    //            ->getResult()
+    //        ;
+    //    }
+
+    //    public function findOneBySomeField($value): ?Productos
+    //    {
+    //        return $this->createQueryBuilder('p')
+    //            ->andWhere('p.exampleField = :val')
+    //            ->setParameter('val', $value)
+    //            ->getQuery()
+    //            ->getOneOrNullResult()
+    //        ;
+    //    }
 }

@@ -16,22 +16,21 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/pedido')]
 class PedidosController extends AbstractController
 {
-    #[Route('/', name: 'app_pedido', methods: ['POST'])]
-    public function add(Request $request, ProveedoresRepository $proveedoresRepository,ProductosRepository $productosRepository, PedidosRepository $pedidosRepository,LineasPedidosRepository $lineasPedidoRepository): JsonResponse
+    #[Route('/pedido', name: 'app_pedido', methods: ['POST'])]
+    public function add(Request $request, ProveedoresRepository $proveedoresRepository, ProductosRepository $productosRepository, PedidosRepository $pedidosRepository, LineasPedidosRepository $lineasPedidoRepository): JsonResponse
     {
         try {
             // Decodifico el contenido de la petición http
             $data = json_decode($request->getContent());
             if (!is_null($data)) {
-                $proveedor = $proveedoresRepository->findOneBy(['nombre' => $data->proveedor]);
-                if ((isset($proveedor) && !empty($proveedor))&&(isset($data->fecha) && !empty($data->fecha))) {
+                if ((isset($data->proveedor) && !empty($data->proveedor)) && (isset($data->fecha) && !empty($data->fecha))) {
                     $pedido = new Pedidos();
-                    $fecha=new DateTime($data->fecha);
-                    $pedido->setFecha($fecha);
+                    $proveedor = $proveedoresRepository->findOneBy(['nombre' => $data->proveedor]);
                     $pedido->setProveedor($proveedor);
+                    $fecha = DateTime::createFromFormat("d/m/Y H:i:s", $data->fecha);
+                    $pedido->setFecha($fecha);
                     if (isset($data->detalles) && !empty($data->detalles)) {
                         $pedido->setDetalles($data->detalles);
                     }
@@ -39,11 +38,11 @@ class PedidosController extends AbstractController
                     $proveedor->addPedido($pedido);
                     if (isset($data->productos) && !empty($data->productos)) {
                         $cont = 0;
-                        $productos=$data->productos;
-                        foreach($productos as $producto){
-                            if((isset($producto->nombre)&& !empty($producto->nombre))&&(isset($producto->cantidad)&& !empty($producto->cantidad))){
+                        $productos = $data->productos;
+                        foreach ($productos as $producto) {
+                            if ((isset($producto->nombre) && !empty($producto->nombre)) && (isset($producto->cantidad) && !empty($producto->cantidad))) {
                                 $lineasPedido = new LineasPedidos();
-                                $productoPedido=$productosRepository->findOneBy(['nombre'=>$producto->nombre]);
+                                $productoPedido = $productosRepository->findOneBy(['nombre' => $producto->nombre]);
                                 $lineasPedido->setProducto($productoPedido);
                                 $lineasPedido->setCantidad($producto->cantidad);
                                 $lineasPedido->setPedido($pedido);
@@ -53,7 +52,7 @@ class PedidosController extends AbstractController
                             }
                         }
                     }
-                    if($cont>0){
+                    if ($cont > 0) {
                         $pedidosRepository->save(true);
                         if ($pedidosRepository->testInsert($pedido)) {
                             return new JsonResponse(['status' => 'Pedido creado correctamente'], Response::HTTP_CREATED);
@@ -72,11 +71,12 @@ class PedidosController extends AbstractController
             return new JsonResponse(['status' => $msg], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
-} 
-/*
+}
+
+/* formato json para postman
 {
     "proveedor": "Proveedor1",
-    "fecha":"01-01-24",
+    "fecha":"01/01/24 12:00:00",
     "detalles": "detalle1",
     "productos": [
         {"nombre": "Producto1", "cantidad": 10},

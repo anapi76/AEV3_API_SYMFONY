@@ -27,7 +27,7 @@ class Pedidos
     private ?bool $estado = true;
 
     #[ORM\ManyToOne(inversedBy: 'pedidos')]
-    #[ORM\JoinColumn(name: 'idProveedor', referencedColumnName: 'idProveedor',nullable: false)]
+    #[ORM\JoinColumn(name: 'idProveedor', referencedColumnName: 'idProveedor', onDelete: 'SET NULL')]
     private ?Proveedores $proveedor = null;
 
     #[ORM\OneToMany(mappedBy: 'pedido', targetEntity: LineasPedidos::class)]

@@ -4,7 +4,6 @@ namespace App\Repository;
 
 use App\Entity\Proveedores;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -22,7 +21,7 @@ class ProveedoresRepository extends ServiceEntityRepository
         parent::__construct($registry, Proveedores::class);
     }
 
-    public function proveedoresJSON(): mixed
+    public function proveedoresAllJSON(): mixed
     {
         $proveedores = $this->findAll();
         if (empty($proveedores)) {
@@ -42,6 +41,7 @@ class ProveedoresRepository extends ServiceEntityRepository
             return $json;
         }
     }
+    
     public function proveedorJSON(int $id): mixed
     {
         $proveedor = $this->find($id);
@@ -61,71 +61,57 @@ class ProveedoresRepository extends ServiceEntityRepository
         return $json;
     }
 
-    public function new(string $nombre, string $cif, string $direccion, ?int $telefono, ?string $email, ?string $contacto): void
+    public function new(string $nombre, string $cif, string $direccion, ?int $telefono, ?string $email, ?string $contacto): bool
     {
-        $proveedor = new Proveedores();
-        $proveedor->setNombre($nombre);
-        $proveedor->setCif($cif);
-        $proveedor->setDireccion($direccion);
-        if(!is_null($telefono)) $proveedor->setTelefono($telefono);
-        if(!is_null($email)) $proveedor->setEmail($email);
-        if(!is_null($contacto)) $proveedor->setContacto($contacto);
-        $this->save($proveedor,true);
+        try {
+            $proveedor = new Proveedores();
+            $proveedor->setNombre($nombre);
+            $proveedor->setCif($cif);
+            $proveedor->setDireccion($direccion);
+            if (!is_null($telefono)) $proveedor->setTelefono($telefono);
+            if (!is_null($email)) $proveedor->setEmail($email);
+            if (!is_null($contacto)) $proveedor->setContacto($contacto);
+            $this->save($proveedor);
+            return true;
+        } catch (\Exception $e) {
+            return false; // Indica que la inserción falló
+        }
     }
 
-    public function update(Proveedores $proveedor, ?string $nuevoNombre, ?string $cif, ?string $direccion, ?int $telefono, ?string $email, ?string $contacto): void
+    public function update(Proveedores $proveedor, ?string $nuevoNombre, ?string $cif, ?string $direccion, ?int $telefono, ?string $email, ?string $contacto): bool
     {
-        if(!is_null($nuevoNombre))$proveedor->setNombre($nuevoNombre);
-        if(!is_null($cif))$proveedor->setCif($cif);
-        if(!is_null($direccion))$proveedor->setDireccion($direccion);
-        if(!is_null($telefono)) $proveedor->setTelefono($telefono);
-        if(!is_null($email)) $proveedor->setEmail($email);
-        if(!is_null($contacto)) $proveedor->setContacto($contacto);
-        $this->save($proveedor,true);
+        try {
+            if (!is_null($nuevoNombre)) $proveedor->setNombre($nuevoNombre);
+            if (!is_null($cif)) $proveedor->setCif($cif);
+            if (!is_null($direccion)) $proveedor->setDireccion($direccion);
+            if (!is_null($telefono)) $proveedor->setTelefono($telefono);
+            if (!is_null($email)) $proveedor->setEmail($email);
+            if (!is_null($contacto)) $proveedor->setContacto($contacto);
+            $this->save($proveedor);
+            return true;
+        } catch (\Exception $e) {
+            return false; // Indica que la actualización falló
+        }
     }
 
-
-    public function save(Proveedores $proveedor, bool $flush = false): void
+    public function remove(Proveedores $proveedor): bool
     {
-        $this->getEntityManager()->persist($proveedor);
-        if ($flush) {
+        try {
+            $this->getEntityManager()->remove($proveedor);
             $this->getEntityManager()->flush();
+            return true;
+        } catch (\Exception $e) {
+            return false;
         }
     }
 
-    public function remove(Proveedores $proveedor, bool $flush = false): void
+    public function save(Proveedores $proveedor): void
     {
-        $this->getEntityManager()->remove($proveedor);
-
-        if ($flush) {
+        try {
+            $this->getEntityManager()->persist($proveedor);
             $this->getEntityManager()->flush();
-        }
-    }
-
-    public function testInsert(?string $nombre): bool
-    {
-        if (is_null($nombre) || empty($nombre)) {
-            return false;
-        } else {
-            $entidad = $this->findOneBy(['nombre'=>$nombre]);
-            if (is_null($entidad))
-                return false;
-            else {
-                return true;
-            }
-        }
-    }
-    public function testDelete(Proveedores $proveedor): bool
-    {
-        if (is_null($proveedor) ) {
-            return false;
-        } else {
-            $entidad = $this->find($proveedor);
-            if (is_null($entidad))
-                return true;
-            else {
-                return false;
-            }
+        } catch (\Exception $e) {
+            throw $e;
         }
     }
 

@@ -24,7 +24,7 @@ class Productos
     private ?string $descripcion = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 8, scale: 2,options: ['default' => 0.0])]
-    private ?string $precio = null;
+    private ?float $precio = null;
 
     #[ORM\OneToMany(mappedBy: 'producto', targetEntity: LineasPedidos::class)]
     private Collection $lineasPedidos;
