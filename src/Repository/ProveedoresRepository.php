@@ -64,7 +64,7 @@ class ProveedoresRepository extends ServiceEntityRepository
     }
 
     //método que recibe los parámetro para añadir un proveedor nuevo a la bd
-    public function new(string $nombre, string $cif, string $direccion, ?int $telefono, ?string $email, ?string $contacto, bool $flush): void
+    public function new(string $nombre, string $cif, string $direccion, ?int $telefono, ?string $email, ?string $contacto, bool $flush): bool
     {
         try {
             $proveedor = new Proveedores();
@@ -74,14 +74,18 @@ class ProveedoresRepository extends ServiceEntityRepository
             if (!is_null($telefono)) $proveedor->setTelefono($telefono);
             if (!is_null($email)) $proveedor->setEmail($email);
             if (!is_null($contacto)) $proveedor->setContacto($contacto);
-            $this->save($proveedor, $flush);
+            if($this->save($proveedor, $flush)){
+                return true;
+            }else{
+                return false;  
+            }
         } catch (\Exception $e) {
             throw $e;
         }
     }
 
     //método que recibe lso parámetros para actualizar un proveedor de la bd
-    public function update(Proveedores $proveedor, ?string $nuevoNombre, ?string $cif, ?string $direccion, ?int $telefono, ?string $email, ?string $contacto, bool $flush): void
+    public function update(Proveedores $proveedor, ?string $nuevoNombre, ?string $cif, ?string $direccion, ?int $telefono, ?string $email, ?string $contacto, bool $flush): bool
     {
         try {
             if (!is_null($nuevoNombre)) $proveedor->setNombre($nuevoNombre);
@@ -90,75 +94,40 @@ class ProveedoresRepository extends ServiceEntityRepository
             if (!is_null($telefono)) $proveedor->setTelefono($telefono);
             if (!is_null($email)) $proveedor->setEmail($email);
             if (!is_null($contacto)) $proveedor->setContacto($contacto);
-            $this->save($proveedor, $flush);
+            if($this->save($proveedor, $flush)){
+                return true;
+            }else{
+                return false;  
+            }
         } catch (\Exception $e) {
             throw $e;
         }
     }
 
     //método para borrar un proveedor de la bd
-    public function remove(Proveedores $proveedor, bool $flush = false): void
+    public function remove(Proveedores $proveedor, bool $flush = false): bool
     {
         try {
             $this->getEntityManager()->remove($proveedor);
             if ($flush) {
                 $this->getEntityManager()->flush();
             }
+            return true;
         } catch (\Exception $e) {
-            throw $e;
+            return false;
         }
     }
 
     //método para persistir y flushear los datos en la bd
-    public function save(Proveedores $proveedor, bool $flush = false): void
+    public function save(Proveedores $proveedor, bool $flush = false): bool
     {
         try {
             $this->getEntityManager()->persist($proveedor);
             if ($flush) {
                 $this->getEntityManager()->flush();
-                /* $unitOfWork = $this->getEntityManager()->getUnitOfWork();
-                $changes = $unitOfWork->getEntityChangeSet($proveedor);
-                if (!empty($changes)) {
-                    return true;
-                }
-                else{
-                    return false;
-                } */
             }
+            return true;
         } catch (\Exception $e) {
-            throw $e;
-        }
-    }
-
-    //Función que comprueba si el pedido se ha insertado correctamente en la BD
-    public function testInsert(string $nombre): bool
-    {
-        $entidad = $this->findOneBy(['nombre' => $nombre]);
-        if (is_null($entidad))
-            return false;
-        else {
-            return true;
-        }
-    }
-
-    //Función que comprueba si el pedido se ha actualizado correctamente en la BD
-    public function testUpdate(Proveedores $proveedor): bool
-    {
-        $entidad = $this->find($proveedor);
-        if (is_null($entidad))
-            return false;
-        else {
-            return true;
-        }
-    }
-
-    //Función que comprueba si el pedido se ha borrado correctamente en la BD
-    public function testDelete(int $id): bool
-    {
-        $entidad = $this->findOneBy($id);
-        if (is_null($entidad))
-            return true;
-        else {
             return false;
         }
     }

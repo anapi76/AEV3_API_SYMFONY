@@ -41,50 +41,53 @@ class ProductosRepository extends ServiceEntityRepository
 
     public function productoJSON(Productos $producto): mixed
     {
-            $json = array();
-            $json[$producto->getId()] = array(
-                'NOMBRE' => $producto->getNombre(),
-                'DESCRIPCION' => $producto->getDescripcion(),
-                'PRECIO' => $producto->getPrecio()
-            );
-        
+        $json = array();
+        $json[$producto->getId()] = array(
+            'NOMBRE' => $producto->getNombre(),
+            'DESCRIPCION' => $producto->getDescripcion(),
+            'PRECIO' => $producto->getPrecio()
+        );
+
         return $json;
     }
 
-    public function new(string $nombre, float $precio, ?string $descripcion): bool
+    public function new(string $nombre, float $precio, ?string $descripcion, $flush): bool
     {
         try {
             $producto = new Productos();
             $producto->setNombre($nombre);
             $producto->setPrecio($precio);
             if (!is_null($descripcion)) $producto->setDescripcion($descripcion);
-            $this->save($producto);
-            return true;
+            if($this->save($producto, $flush)){
+                return true;
+            }
         } catch (\Exception $e) {
-            return false; // Indica que la inserción falló
+            return false;
         }
     }
 
-    public function update(Productos $producto, ?string $nombre, ?float $precio, ?string $descripcion): bool
+    public function update(Productos $producto, ?string $nombre, ?float $precio, ?string $descripcion, $flush): void
     {
         try {
             if (!is_null($nombre)) $producto->setNombre($nombre);
             if (!is_null($precio)) $producto->setPrecio($precio);
             if (!is_null($descripcion)) $producto->setDescripcion($descripcion);
             $this->save($producto);
-            return true;
         } catch (\Exception $e) {
-            return false; // Indica que la actualización falló
+            throw $e;
         }
     }
 
-    public function save(Productos $producto): void
+    public function save(Productos $producto, bool $flush = false):bool
     {
         try {
             $this->getEntityManager()->persist($producto);
-            $this->getEntityManager()->flush();
+            if ($flush) {
+                $this->getEntityManager()->flush();
+            }
+            return true;
         } catch (\Exception $e) {
-            throw $e;
+            return false;
         }
     }
 

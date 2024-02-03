@@ -32,75 +32,28 @@ class ProductosController extends AbstractController
     }
 
     //método que devuelve un producto por su nombre o por su id (recibidos por json)
-    #[Route('/productos/{find}', name: 'app_productos', methods: ['GET'])]
-    public function show(mixed $find): JsonResponse
+    #[Route('/productos/find', name: 'app_productos', methods: ['GET'])]
+    public function show(): JsonResponse
     {
-        if (!is_null($find)) {
-            if (is_numeric($find)) {
-                $producto = $this->productosRepository->find($find);
+        if (count($_GET) > 0) {
+            if (isset($_GET['id']) && !empty($_GET['id'])) {
+                $producto = $this->productosRepository->find($_GET['id']);
+            } elseif (isset($_GET['nombre']) && !empty($_GET['nombre'])) {
+                $producto = $this->productosRepository->findOneBy(['nombre' => $_GET['nombre']]);
             } else {
-                $producto = $this->productosRepository->findOneBy(['nombre' => $find]);
+                return new JsonResponse(['status' => 'Faltan parámetros'], Response::HTTP_BAD_REQUEST);
             }
-            if (!is_null($producto)) {
-                $data = $this->productosRepository->productoJSON($producto);
-                return new JsonResponse($data, Response::HTTP_OK);
-            } else {
+            if (is_null($producto)) {
                 return new JsonResponse(['status' => 'El producto no existe en la bd'], Response::HTTP_NOT_FOUND);
             }
+            $data = $this->productosRepository->productoJSON($producto);
+            return new JsonResponse($data, Response::HTTP_OK);
         } else {
             return new JsonResponse(['status' => 'Faltan parámetros'], Response::HTTP_BAD_REQUEST);
         }
     }
 
-    //método para insertar un producto o actualizarlo si ya existe en la bd
-    #[Route('/productos/{id}', name: 'app_producto_new', methods: ['POST', 'PUT'])]
-    public function add(Request $request, ?int $id=null): JsonResponse
-    {
-        try {
-            // Decodifico el contenido de la petición http
-            $data = json_decode($request->getContent());
-            $method = $request->getMethod();
-            if (!is_null($data)) {
-                $producto = $this->productosRepository->find($id);
-                if ($method === 'POST' && is_null($id)) {
-                    if ((isset($data->nombre) && !empty($data->nombre)) && (isset($data->precio) && !empty($data->precio))) {
-                        $nombre = $data->nombre;
-                        $precio = $data->precio;
-                        $descripcion = (isset($data->descripcion) && !empty($data->descripcion)) ? $data->descripcion : null;
-                        if ($this->productosRepository->new($nombre, $precio, $descripcion)) {
-                            return new JsonResponse(['status' => 'Producto insertado correctamente'], Response::HTTP_CREATED);
-                        } else {
-                            return new JsonResponse(['status' => 'La inserción del producto falló'], Response::HTTP_INTERNAL_SERVER_ERROR);
-                        }
-                    } else {
-                        return new JsonResponse(['status' => 'Faltan parámetros'], Response::HTTP_BAD_REQUEST);
-                    }
-                } elseif ($method === 'PUT' && !is_null($producto)) {
-                    $nombre = (isset($data->nombre) && !empty($data->nombre)) ? $data->nombre : null;
-                    $precio = (isset($data->precio) && !empty($data->precio)) ? $data->precio : null;
-                    $descripcion = (isset($data->descripcion) && !empty($data->descripcion)) ? $data->descripcion : null;
-                    if (!is_null($nombre) || !is_null($precio) || !is_null($descripcion)) {
-                        if ($this->productosRepository->update($producto, $nombre, $precio, $descripcion)) {
-                            return new JsonResponse(['status' => 'Producto actualizado correctamente'], Response::HTTP_CREATED);
-                        } else {
-                            return new JsonResponse(['status' => 'La actualización del producto falló'], Response::HTTP_INTERNAL_SERVER_ERROR);
-                        }
-                    } else {
-                        return new JsonResponse(['status' => 'No hay campos que actualizar'], Response::HTTP_BAD_REQUEST);
-                    }
-                } else {
-                    return new JsonResponse(['status' => 'Método incorrecto'], Response::HTTP_INTERNAL_SERVER_ERROR);
-                }
-            } else {
-                return new JsonResponse(['status' => 'Error al decodificar el archivo json'], Response::HTTP_BAD_REQUEST);
-            }
-        } catch (Exception $e) {
-            $msg = 'Error del servidor: ' . $e->getMessage();
-            return new JsonResponse(['status' => $msg], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    /*     //método para insertar un producto
+    //método para insertar un producto
     #[Route('/productos', name: 'app_producto_new', methods: ['POST'])]
     public function add(Request $request): JsonResponse
     {
@@ -115,7 +68,7 @@ class ProductosController extends AbstractController
                 } else {
                     return new JsonResponse(['status' => 'Faltan parámetros'], Response::HTTP_BAD_REQUEST);
                 }
-                if ($this->productosRepository->new($nombre, $precio, $descripcion)) {
+                if ($this->productosRepository->new($nombre, $precio, $descripcion, true)) {
                     return new JsonResponse(['status' => 'Producto insertado correctamente'], Response::HTTP_CREATED);
                 } else {
                     return new JsonResponse(['status' => 'La inserción del producto falló'], Response::HTTP_INTERNAL_SERVER_ERROR);
@@ -142,16 +95,15 @@ class ProductosController extends AbstractController
                     $nombre = (isset($data->nombre) && !empty($data->nombre)) ? $data->nombre : null;
                     $precio = (isset($data->precio) && !empty($data->precio)) ? $data->precio : null;
                     $descripcion = (isset($data->descripcion) && !empty($data->descripcion)) ? $data->descripcion : null;
-                    if(!is_null($nombre) ||!is_null($precio)||!is_null($descripcion) ){
-                        if ($this->productosRepository->update($producto, $nombre, $precio, $descripcion)) {
+                    if (!is_null($nombre) || !is_null($precio) || !is_null($descripcion)) {
+                        if ($this->productosRepository->update($producto, $nombre, $precio, $descripcion, true)) {
                             return new JsonResponse(['status' => 'Producto actualizado correctamente'], Response::HTTP_CREATED);
                         } else {
                             return new JsonResponse(['status' => 'La actualización del producto falló'], Response::HTTP_INTERNAL_SERVER_ERROR);
                         }
-                    }else{
+                    } else {
                         return new JsonResponse(['status' => 'No hay campos que actualizar'], Response::HTTP_BAD_REQUEST);
                     }
-                    
                 } else {
                     return new JsonResponse(['status' => 'El producto no existe en la bd'], Response::HTTP_NOT_FOUND);
                 }
@@ -162,5 +114,5 @@ class ProductosController extends AbstractController
             $msg = 'Error del servidor: ' . $e->getMessage();
             return new JsonResponse(['status' => $msg], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-    } */
+    }
 }

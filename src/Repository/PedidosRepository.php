@@ -21,21 +21,6 @@ class PedidosRepository extends ServiceEntityRepository
         parent::__construct($registry, Pedidos::class);
     }
 
-    //Función que comprueba si el pedido se ha insertado correctamente en la BD
-    public function testInsert(?Pedidos $pedido): bool
-    {
-        if (is_null($pedido)) {
-            return false;
-        } else {
-            $entidad = $this->find($pedido);
-            if (is_null($entidad))
-                return false;
-            else {
-                return true;
-            }
-        }
-    }
-
     //Función para persitir la entidad
     public function persist(Pedidos $pedido): void
     {
@@ -43,14 +28,15 @@ class PedidosRepository extends ServiceEntityRepository
     }
 
     //Función para hacer flush 
-    public function save(bool $flush=false): void
+    public function save(bool $flush=false): bool
     {
         try {
             if($flush){
                 $this->getEntityManager()->flush();
             }
+            return true;
         } catch (\Exception $e) {
-            throw $e;
+            return false;
         }
     }
 
