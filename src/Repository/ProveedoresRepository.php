@@ -21,6 +21,7 @@ class ProveedoresRepository extends ServiceEntityRepository
         parent::__construct($registry, Proveedores::class);
     }
 
+    //método para devolver todos los proveedores en formato json
     public function proveedoresAllJSON(): mixed
     {
         $proveedores = $this->findAll();
@@ -41,7 +42,8 @@ class ProveedoresRepository extends ServiceEntityRepository
             return $json;
         }
     }
-    
+
+    //método para devolver un proveedor en formato json
     public function proveedorJSON(int $id): mixed
     {
         $proveedor = $this->find($id);
@@ -61,7 +63,8 @@ class ProveedoresRepository extends ServiceEntityRepository
         return $json;
     }
 
-    public function new(string $nombre, string $cif, string $direccion, ?int $telefono, ?string $email, ?string $contacto): bool
+    //método que recibe los parámetro para añadir un proveedor nuevo a la bd
+    public function new(string $nombre, string $cif, string $direccion, ?int $telefono, ?string $email, ?string $contacto, bool $flush): void
     {
         try {
             $proveedor = new Proveedores();
@@ -71,14 +74,14 @@ class ProveedoresRepository extends ServiceEntityRepository
             if (!is_null($telefono)) $proveedor->setTelefono($telefono);
             if (!is_null($email)) $proveedor->setEmail($email);
             if (!is_null($contacto)) $proveedor->setContacto($contacto);
-            $this->save($proveedor);
-            return true;
+            $this->save($proveedor, $flush);
         } catch (\Exception $e) {
-            return false; // Indica que la inserción falló
+            throw $e;
         }
     }
 
-    public function update(Proveedores $proveedor, ?string $nuevoNombre, ?string $cif, ?string $direccion, ?int $telefono, ?string $email, ?string $contacto): bool
+    //método que recibe lso parámetros para actualizar un proveedor de la bd
+    public function update(Proveedores $proveedor, ?string $nuevoNombre, ?string $cif, ?string $direccion, ?int $telefono, ?string $email, ?string $contacto, bool $flush): void
     {
         try {
             if (!is_null($nuevoNombre)) $proveedor->setNombre($nuevoNombre);
@@ -87,34 +90,78 @@ class ProveedoresRepository extends ServiceEntityRepository
             if (!is_null($telefono)) $proveedor->setTelefono($telefono);
             if (!is_null($email)) $proveedor->setEmail($email);
             if (!is_null($contacto)) $proveedor->setContacto($contacto);
-            $this->save($proveedor);
-            return true;
-        } catch (\Exception $e) {
-            return false; // Indica que la actualización falló
-        }
-    }
-
-    public function remove(Proveedores $proveedor): bool
-    {
-        try {
-            $this->getEntityManager()->remove($proveedor);
-            $this->getEntityManager()->flush();
-            return true;
-        } catch (\Exception $e) {
-            return false;
-        }
-    }
-
-    public function save(Proveedores $proveedor): void
-    {
-        try {
-            $this->getEntityManager()->persist($proveedor);
-            $this->getEntityManager()->flush();
+            $this->save($proveedor, $flush);
         } catch (\Exception $e) {
             throw $e;
         }
     }
 
+    //método para borrar un proveedor de la bd
+    public function remove(Proveedores $proveedor, bool $flush = false): void
+    {
+        try {
+            $this->getEntityManager()->remove($proveedor);
+            if ($flush) {
+                $this->getEntityManager()->flush();
+            }
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
+    //método para persistir y flushear los datos en la bd
+    public function save(Proveedores $proveedor, bool $flush = false): void
+    {
+        try {
+            $this->getEntityManager()->persist($proveedor);
+            if ($flush) {
+                $this->getEntityManager()->flush();
+                /* $unitOfWork = $this->getEntityManager()->getUnitOfWork();
+                $changes = $unitOfWork->getEntityChangeSet($proveedor);
+                if (!empty($changes)) {
+                    return true;
+                }
+                else{
+                    return false;
+                } */
+            }
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
+    //Función que comprueba si el pedido se ha insertado correctamente en la BD
+    public function testInsert(string $nombre): bool
+    {
+        $entidad = $this->findOneBy(['nombre' => $nombre]);
+        if (is_null($entidad))
+            return false;
+        else {
+            return true;
+        }
+    }
+
+    //Función que comprueba si el pedido se ha actualizado correctamente en la BD
+    public function testUpdate(Proveedores $proveedor): bool
+    {
+        $entidad = $this->find($proveedor);
+        if (is_null($entidad))
+            return false;
+        else {
+            return true;
+        }
+    }
+
+    //Función que comprueba si el pedido se ha borrado correctamente en la BD
+    public function testDelete(int $id): bool
+    {
+        $entidad = $this->findOneBy($id);
+        if (is_null($entidad))
+            return true;
+        else {
+            return false;
+        }
+    }
 
     //    /**
     //     * @return Proveedores[] Returns an array of Proveedores objects

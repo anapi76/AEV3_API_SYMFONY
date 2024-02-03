@@ -65,6 +65,19 @@ class ProductosRepository extends ServiceEntityRepository
         }
     }
 
+    public function update(Productos $producto, ?string $nombre, ?float $precio, ?string $descripcion): bool
+    {
+        try {
+            if (!is_null($nombre)) $producto->setNombre($nombre);
+            if (!is_null($precio)) $producto->setPrecio($precio);
+            if (!is_null($descripcion)) $producto->setDescripcion($descripcion);
+            $this->save($producto);
+            return true;
+        } catch (\Exception $e) {
+            return false; // Indica que la actualización falló
+        }
+    }
+
     public function save(Productos $producto): void
     {
         try {

@@ -3,10 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\LineasPedidos;
-use App\Entity\Pedidos;
-use App\Entity\Productos;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**

@@ -21,6 +21,11 @@ class StockRepository extends ServiceEntityRepository
         parent::__construct($registry, Stock::class);
     }
 
+/*     public function stockProductoJSON(int $id):mixed{
+        $stockProducto=$this->findBy()
+
+    } */
+
 //    /**
 //     * @return Stock[] Returns an array of Stock objects
 //     */

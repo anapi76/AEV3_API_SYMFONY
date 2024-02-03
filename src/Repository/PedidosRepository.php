@@ -3,10 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Pedidos;
-use App\Entity\Proveedores;
-use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -40,15 +37,20 @@ class PedidosRepository extends ServiceEntityRepository
     }
 
     //Función para persitir la entidad
-    public function persist(Pedidos $pedido):void{
+    public function persist(Pedidos $pedido): void
+    {
         $this->getEntityManager()->persist($pedido);
     }
 
     //Función para hacer flush 
-    public function save(bool $flush = false): void
+    public function save(bool $flush=false): void
     {
-        if ($flush) {
-            $this->getEntityManager()->flush();
+        try {
+            if($flush){
+                $this->getEntityManager()->flush();
+            }
+        } catch (\Exception $e) {
+            throw $e;
         }
     }
 

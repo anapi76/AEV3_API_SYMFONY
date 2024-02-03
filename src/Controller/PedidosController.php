@@ -18,6 +18,9 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class PedidosController extends AbstractController
 {
+
+
+    //Método para crear un nuevo pedido
     #[Route('/pedido', name: 'app_pedido', methods: ['POST'])]
     public function add(Request $request, ProveedoresRepository $proveedoresRepository, ProductosRepository $productosRepository, PedidosRepository $pedidosRepository, LineasPedidosRepository $lineasPedidoRepository): JsonResponse
     {
@@ -26,39 +29,59 @@ class PedidosController extends AbstractController
             $data = json_decode($request->getContent());
             if (!is_null($data)) {
                 if ((isset($data->proveedor) && !empty($data->proveedor)) && (isset($data->fecha) && !empty($data->fecha))) {
-                    $pedido = new Pedidos();
                     $proveedor = $proveedoresRepository->findOneBy(['nombre' => $data->proveedor]);
-                    $pedido->setProveedor($proveedor);
-                    $fecha = DateTime::createFromFormat("d/m/Y H:i:s", $data->fecha);
-                    $pedido->setFecha($fecha);
-                    if (isset($data->detalles) && !empty($data->detalles)) {
-                        $pedido->setDetalles($data->detalles);
-                    }
-                    $pedidosRepository->persist($pedido);
-                    $proveedor->addPedido($pedido);
-                    if (isset($data->productos) && !empty($data->productos)) {
-                        $cont = 0;
-                        $productos = $data->productos;
-                        foreach ($productos as $producto) {
-                            if ((isset($producto->nombre) && !empty($producto->nombre)) && (isset($producto->cantidad) && !empty($producto->cantidad))) {
-                                $lineasPedido = new LineasPedidos();
-                                $productoPedido = $productosRepository->findOneBy(['nombre' => $producto->nombre]);
-                                $lineasPedido->setProducto($productoPedido);
-                                $lineasPedido->setCantidad($producto->cantidad);
-                                $lineasPedido->setPedido($pedido);
-                                $lineasPedidoRepository->persist($lineasPedido);
-                                $pedido->addLineasPedido($lineasPedido);
-                                $cont++;
+                    if (!is_null($proveedor)) {
+                        $pedido = new Pedidos();
+                        $pedido->setProveedor($proveedor);
+                        $fecha = DateTime::createFromFormat("d/m/Y H:i:s", $data->fecha);
+                        $pedido->setFecha($fecha);
+                        if (isset($data->detalles) && !empty($data->detalles)) {
+                            $pedido->setDetalles($data->detalles);
+                        }
+                        if (isset($data->estado) && !empty($data->estado)) {
+                            if ($data->estado === 'creado') {
+                                $estado = true;
+                            } elseif ($data->estado === 'entregado') {
+                                $estado = false;
+                            }
+                            $pedido->setEstado($estado);
+                        }
+                        $pedidosRepository->persist($pedido);
+                        $proveedor->addPedido($pedido);
+                        if (isset($data->productos) && !empty($data->productos)) {
+                            $cont = 0;
+                            $productos = $data->productos;
+                            foreach ($productos as $producto) {
+                                if ((isset($producto->nombre) && !empty($producto->nombre)) && (isset($producto->cantidad) && !empty($producto->cantidad))) {
+                                    $lineasPedido = new LineasPedidos();
+                                    $productoPedido = $productosRepository->findOneBy(['nombre' => $producto->nombre]);
+                                    $lineasPedido->setProducto($productoPedido);
+                                    $lineasPedido->setCantidad($producto->cantidad);
+                                    if (isset($data->entregado) && !empty($data->entregado)) {
+                                        if ($data->estado === 'entregado') {
+                                            $estado = true;
+                                        } elseif ($data->estado === 'pendiente') {
+                                            $estado = false;
+                                        }
+                                        $pedido->setEstado($estado);
+                                    }
+                                    $lineasPedido->setPedido($pedido);
+                                    $lineasPedidoRepository->persist($lineasPedido);
+                                    $pedido->addLineasPedido($lineasPedido);
+                                    $cont++;
+                                }
                             }
                         }
-                    }
-                    if ($cont > 0) {
-                        $pedidosRepository->save(true);
-                        if ($pedidosRepository->testInsert($pedido)) {
-                            return new JsonResponse(['status' => 'Pedido creado correctamente'], Response::HTTP_CREATED);
-                        } else {
-                            return new JsonResponse(['status' => 'El pedido no se ha creado'], Response::HTTP_BAD_REQUEST);
+                        if ($cont > 0) {
+                            $pedidosRepository->save(true);
+                            if ($pedidosRepository->testInsert($pedido)) {
+                                return new JsonResponse(['status' => 'Pedido creado correctamente'], Response::HTTP_CREATED);
+                            } else {
+                                return new JsonResponse(['status' => 'La creación del pedido falló'], Response::HTTP_INTERNAL_SERVER_ERROR);
+                            }
                         }
+                    } else {
+                        return new JsonResponse(['status' => 'El proveedor no existe en la bd'], Response::HTTP_NOT_FOUND);
                     }
                 } else {
                     return new JsonResponse(['status' => 'Faltan parámetros'], Response::HTTP_BAD_REQUEST);
@@ -78,9 +101,10 @@ class PedidosController extends AbstractController
     "proveedor": "Proveedor1",
     "fecha":"01/01/24 12:00:00",
     "detalles": "detalle1",
+    "estado":"creado",
     "productos": [
-        {"nombre": "Producto1", "cantidad": 10},
-        {"nombre": "Producto2", "cantidad": 15}
+        {"nombre": "Producto1", "cantidad": 10,"entregado":"pendiente"},
+        {"nombre": "Producto2", "cantidad": 15,"entregado":"pendiente"}
     ]
 }
 */
