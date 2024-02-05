@@ -44,10 +44,13 @@ class ComandasController extends AbstractController
                 return new JsonResponse(['status' => 'Faltan parámetros'], Response::HTTP_BAD_REQUEST);
             }
             $comanda = new Comandas();
-            $fecha = DateTime::createFromFormat("d/m/Y H:i:s", $data->fecha);
+            $fecha = date_create_from_format("d/m/Y H:i:s", ($data->fecha));
             $comanda->setFecha($fecha);
             //Busco la mesa con el id que hemos recibido y la introduzco
             $mesa = $this->mesaRepository->find($data->mesa);
+            if(is_null($mesa)){
+                return new JsonResponse(['status' => "La mesa no existe en la bd"], Response::HTTP_NOT_FOUND);
+            }
             if ($data->comensales > $mesa->getComensales()) {
                 return new JsonResponse(['status' => 'Los comensales no caben en la mesa seleccionada'], Response::HTTP_BAD_REQUEST);
             }
@@ -107,11 +110,14 @@ class ComandasController extends AbstractController
                 return new JsonResponse(['status' => "La comanda no existe en la bd"], Response::HTTP_NOT_FOUND);
             }
             if (isset($data->fecha) && !empty($data->fecha)) {
-                $fecha = DateTime::createFromFormat("d/m/Y H:i:s", $data->fecha);
+                $fecha = date_create_from_format("d/m/Y H:i:s", ($data->fecha));
                 $comanda->setFecha($fecha);
             }
             if (isset($data->mesa) && !empty($data->mesa)) {
                 $mesa = $this->mesaRepository->find($data->mesa);
+            }
+            if(is_null($mesa)){
+                return new JsonResponse(['status' => "La mesa no existe en la bd"], Response::HTTP_NOT_FOUND);
             }
             if ($data->comensales > $mesa->getComensales()) {
                 return new JsonResponse(['status' => 'Los comensales no caben en la mesa seleccionada'], Response::HTTP_BAD_REQUEST);

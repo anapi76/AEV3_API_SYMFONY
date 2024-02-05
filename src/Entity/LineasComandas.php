@@ -16,7 +16,7 @@ class LineasComandas
     private ?int $id = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 8, scale: 2)]
-    private ?string $cantidad = null;
+    private ?float $cantidad = null;
 
     #[ORM\Column(options:['default'=>false])]
     private ?bool $entregado = false;
@@ -34,12 +34,12 @@ class LineasComandas
         return $this->id;
     }
 
-    public function getCantidad(): ?string
+    public function getCantidad(): ?float
     {
         return $this->cantidad;
     }
 
-    public function setCantidad(string $cantidad): static
+    public function setCantidad(float $cantidad): static
     {
         $this->cantidad = $cantidad;
 

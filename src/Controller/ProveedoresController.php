@@ -54,6 +54,14 @@ class ProveedoresController extends AbstractController
             if ((!isset($data->nombre) || empty($data->nombre)) || (!isset($data->cif) || empty($data->cif)) || (!isset($data->direccion) || empty($data->direccion))) {
                 return new JsonResponse(['status' => 'Faltan parámetros'], Response::HTTP_BAD_REQUEST);
             }
+            $proveedor=$this->proveedoresRepository->findOneBy(['nombre'=>$data->nombre]);
+            if(!is_null($proveedor)){
+                return new JsonResponse(['status' => 'Nombre incorrecto, ya existe en la bd'], Response::HTTP_BAD_REQUEST);
+            }
+            $proveedor= $proveedor=$this->proveedoresRepository->findOneBy(['cif'=>$data->cif]);
+            if(!is_null($proveedor)){
+                return new JsonResponse(['status' => 'CIF incorrecto, ya existe en la bd'], Response::HTTP_BAD_REQUEST);
+            }
             $telefono = (isset($data->telefono) && !empty($data->telefono)) ? $data->telefono : null;
             $email = (isset($data->email) && !empty($data->email)) ? $data->email : null;
             $contacto = (isset($data->contacto) && !empty($data->contacto)) ? $data->contacto : null;

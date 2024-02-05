@@ -19,10 +19,10 @@ class Tickets
     private ?\DateTimeInterface $fecha = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
-    private ?string $importe = null;
+    private ?float $importe = null;
 
     #[ORM\Column(options:['default'=>false])]
-    private ?bool $pagado = null;
+    private ?bool $pagado = false;
 
     #[ORM\ManyToOne(inversedBy: 'tickets')]
     #[ORM\JoinColumn(name: 'idComanda', referencedColumnName: 'idComanda', nullable: false)]
@@ -45,12 +45,12 @@ class Tickets
         return $this;
     }
 
-    public function getImporte(): ?string
+    public function getImporte(): ?float
     {
         return $this->importe;
     }
 
-    public function setImporte(string $importe): static
+    public function setImporte(float $importe): static
     {
         $this->importe = $importe;
 

@@ -8,7 +8,6 @@ use App\Repository\LineasPedidosRepository;
 use App\Repository\PedidosRepository;
 use App\Repository\ProductosRepository;
 use App\Repository\ProveedoresRepository;
-use DateTime;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -37,18 +36,10 @@ class PedidosController extends AbstractController
             }
             $pedido = new Pedidos();
             $pedido->setProveedor($proveedor);
-            $fecha = DateTime::createFromFormat("d/m/Y H:i:s", $data->fecha);
+            $fecha = date_create_from_format("d/m/Y H:i:s", ($data->fecha));
             $pedido->setFecha($fecha);
             if (isset($data->detalles) && !empty($data->detalles)) {
                 $pedido->setDetalles($data->detalles);
-            }
-            if (isset($data->estado) && !empty($data->estado)) {
-                if ($data->estado === 'creado') {
-                    $estado = true;
-                } elseif ($data->estado === 'entregado') {
-                    $estado = false;
-                }
-                $pedido->setEstado($estado);
             }
             $pedidosRepository->persist($pedido);
             $proveedor->addPedido($pedido);
@@ -68,14 +59,6 @@ class PedidosController extends AbstractController
                 }
                 $lineasPedido->setProducto($productoPedido);
                 $lineasPedido->setCantidad($producto->cantidad);
-                if (isset($data->entregado) && !empty($data->entregado)) {
-                    if ($data->estado === 'entregado') {
-                        $estado = true;
-                    } elseif ($data->estado === 'pendiente') {
-                        $estado = false;
-                    }
-                    $pedido->setEstado($estado);
-                }
                 $lineasPedido->setPedido($pedido);
                 $lineasPedidoRepository->persist($lineasPedido);
                 $pedido->addLineasPedido($lineasPedido);
@@ -97,3 +80,14 @@ class PedidosController extends AbstractController
         }
     }
 }
+
+/* {
+    "fecha":"10/02/2024 12:00:00",
+    "detalles":"Detalles pedido",
+    "productos":[
+        {"nombre":"producto1",
+        "cantidad":10,
+    "estado":"pendiente"},
+        {}
+    ]
+} */

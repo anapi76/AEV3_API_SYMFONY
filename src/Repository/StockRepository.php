@@ -41,28 +41,27 @@ class StockRepository extends ServiceEntityRepository
         $json = array();
         foreach ($productos as $producto) {
             $arrayStock = $this->findBy(['producto' => $producto]);
-            if (!empty($arrayStock)) {
-                $ultimoStock = null;
-                foreach ($arrayStock as $stock) {
-                    $stockFecha = $stock->getFecha();
-                    if ($stockFecha <= $fecha) {
-                        if (is_null($ultimoStock) || $stockFecha > $ultimoStock->getFecha()) {
-                            $ultimoStock = $stock;
-                        }
-                    }
-                }
-                if (!is_null($ultimoStock)) {
-                    $json[] = [
-                        'PRODUCTO' => $stock->getProducto()->getNombre(),
-                        'FECHA' => $stock->getFecha()->format('d-m-Y H:i:s'),
-                        'CANTIDAD' => $stock->getCantidad()
-                    ];
-                }
-            } else {
+            if (empty($arrayStock)) {
                 $json[] = [
                     'PRODUCTO' => $producto->getNombre(),
                     'FECHA' => $fecha->format('d-m-Y H:i:s'),
                     'CANTIDAD' => 0
+                ];
+            }
+            $ultimoStock = null;
+            foreach ($arrayStock as $stock) {
+                $stockFecha = $stock->getFecha();
+                if ($stockFecha <= $fecha) {
+                    if (is_null($ultimoStock) || $stockFecha > $ultimoStock->getFecha()) {
+                        $ultimoStock = $stock;
+                    }
+                }
+            }
+            if (!is_null($ultimoStock)) {
+                $json[] = [
+                    'PRODUCTO' => $ultimoStock->getProducto()->getNombre(),
+                    'FECHA' => $ultimoStock->getFecha()->format('d-m-Y H:i:s'),
+                    'CANTIDAD' => $ultimoStock->getCantidad()
                 ];
             }
         }
@@ -74,34 +73,33 @@ class StockRepository extends ServiceEntityRepository
         $json = array();
         foreach ($productos as $producto) {
             $arrayStock = $this->findBy(['producto' => $producto]);
-            if (!empty($arrayStock)) {
-                $ultimoStock = null;
-                foreach ($arrayStock as $stock) {
-                    $stockFecha = $stock->getFecha();
-                    if ($stockFecha <= $fecha) {
-                        if (is_null($ultimoStock) || $stockFecha > $ultimoStock->getFecha()) {
-                            $ultimoStock = $stock;
-                        }
-                    }
-                }
-                if (!is_null($ultimoStock)) {
-                    $descripcion = (is_null($stock->getProducto()->getDescripcion())) ? '' : $stock->getProducto()->getDescripcion();
-                    $json[] = [
-                        'PRODUCTO' => $stock->getProducto()->getNombre(),
-                        'DESCRIPCION' => $descripcion,
-                        'PRECIO' => $stock->getProducto()->getPrecio() . ' €',
-                        'FECHA' => $stock->getFecha()->format('d-m-Y H:i:s'),
-                        'CANTIDAD' => $stock->getCantidad()
-                    ];
-                }
-            } else {
+            if (empty($arrayStock)) {
                 $descripcion = (is_null($producto->getDescripcion())) ? '' : $producto->getDescripcion();
                 $json[] = [
                     'PRODUCTO' => $producto->getNombre(),
                     'DESCRIPCION' => $descripcion,
-                    'PRECIO' => $producto->getPrecio() . ' €',
+                    'PRECIO' => $producto->getPrecio(),
                     'FECHA' => $fecha->format('d-m-Y H:i:s'),
                     'CANTIDAD' => 0
+                ];
+            }
+            $ultimoStock = null;
+            foreach ($arrayStock as $stock) {
+                $stockFecha = $stock->getFecha();
+                if ($stockFecha <= $fecha) {
+                    if (is_null($ultimoStock) || $stockFecha > $ultimoStock->getFecha()) {
+                        $ultimoStock = $stock;
+                    }
+                }
+            }
+            if (!is_null($ultimoStock)) {
+                $descripcion = (is_null($ultimoStock->getProducto()->getDescripcion())) ? '' : $ultimoStock->getProducto()->getDescripcion();
+                $json[] = [
+                    'PRODUCTO' => $ultimoStock->getProducto()->getNombre(),
+                    'DESCRIPCION' => $descripcion,
+                    'PRECIO' => $ultimoStock->getProducto()->getPrecio(),
+                    'FECHA' => $ultimoStock->getFecha()->format('d-m-Y H:i:s'),
+                    'CANTIDAD' => $ultimoStock->getCantidad()
                 ];
             }
         }
@@ -139,10 +137,10 @@ class StockRepository extends ServiceEntityRepository
     }
 
     //Función para hacer flush 
-    public function save(bool $flush=false): void
+    public function save(bool $flush = false): void
     {
         try {
-            if($flush){
+            if ($flush) {
                 $this->getEntityManager()->flush();
             }
         } catch (\Exception $e) {

@@ -31,25 +31,25 @@ class ProductosController extends AbstractController
     }
 
     //método que devuelve un producto por su nombre o por su id (recibidos por json)
-    #[Route('/productos', name: 'app_productos', methods: ['PATCH'])]
-    public function show(): JsonResponse
+    #[Route('/productos', name: 'app_productos_id_nombre', methods: ['PATCH'])]
+    public function show(Request $request): JsonResponse
     {
-        if (count($_GET) > 0) {
-            if (isset($_GET['id']) && !empty($_GET['id'])) {
-                $producto = $this->productosRepository->find($_GET['id']);
-            } elseif (isset($_GET['nombre']) && !empty($_GET['nombre'])) {
-                $producto = $this->productosRepository->findOneBy(['nombre' => $_GET['nombre']]);
-            } else {
-                return new JsonResponse(['status' => 'Faltan parámetros'], Response::HTTP_BAD_REQUEST);
-            }
-            if (is_null($producto)) {
-                return new JsonResponse(['status' => 'El producto no existe en la bd'], Response::HTTP_NOT_FOUND);
-            }
-            $data = $this->productosRepository->productoJSON($producto);
-            return new JsonResponse($data, Response::HTTP_OK);
+        $data = json_decode($request->getContent());
+        if (is_null($data)) {
+            return new JsonResponse(['status' => 'Error al decodificar el archivo json'], Response::HTTP_BAD_REQUEST);
+        }
+        if (isset($data->id) && !empty($data->id)) {
+            $producto = $this->productosRepository->find($data->id);
+        } elseif (isset($data->nombre) && !empty($data->nombre)) {
+            $producto = $this->productosRepository->findOneBy(['nombre' => $data->nombre]);
         } else {
             return new JsonResponse(['status' => 'Faltan parámetros'], Response::HTTP_BAD_REQUEST);
         }
+        if (is_null($producto)) {
+            return new JsonResponse(['status' => 'El producto no existe en la bd'], Response::HTTP_NOT_FOUND);
+        }
+        $json = $this->productosRepository->productoJSON($producto);
+        return new JsonResponse($json, Response::HTTP_OK);
     }
 
     //método para insertar un producto
@@ -64,6 +64,10 @@ class ProductosController extends AbstractController
             }
             if ((!isset($data->nombre) || empty($data->nombre)) || (!isset($data->precio) || empty($data->precio))) {
                 return new JsonResponse(['status' => 'Faltan parámetros'], Response::HTTP_BAD_REQUEST);
+            }
+            $producto=$this->productosRepository->findOneBy(['nombre'=>$data->nombre]);
+            if(!is_null($producto)){
+                return new JsonResponse(['status' => 'Nombre incorrecto, ya existe en la bd'], Response::HTTP_BAD_REQUEST);
             }
             $nombre = $data->nombre;
             $precio = $data->precio;
