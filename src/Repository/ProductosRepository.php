@@ -51,18 +51,16 @@ class ProductosRepository extends ServiceEntityRepository
         return $json;
     }
 
-    public function new(string $nombre, float $precio, ?string $descripcion, $flush): bool
+    public function new(string $nombre, float $precio, ?string $descripcion, $flush): void
     {
         try {
             $producto = new Productos();
             $producto->setNombre($nombre);
             $producto->setPrecio($precio);
             if (!is_null($descripcion)) $producto->setDescripcion($descripcion);
-            if($this->save($producto, $flush)){
-                return true;
-            }
+            $this->save($producto, $flush);
         } catch (\Exception $e) {
-            return false;
+            throw $e;
         }
     }
 
@@ -72,24 +70,50 @@ class ProductosRepository extends ServiceEntityRepository
             if (!is_null($nombre)) $producto->setNombre($nombre);
             if (!is_null($precio)) $producto->setPrecio($precio);
             if (!is_null($descripcion)) $producto->setDescripcion($descripcion);
-            $this->save($producto);
+            $this->save($producto,$flush);
         } catch (\Exception $e) {
             throw $e;
         }
     }
 
-    public function save(Productos $producto, bool $flush = false):bool
+    public function save(Productos $producto, bool $flush = false):void
     {
         try {
             $this->getEntityManager()->persist($producto);
             if ($flush) {
                 $this->getEntityManager()->flush();
             }
-            return true;
         } catch (\Exception $e) {
-            return false;
+            throw $e;
         }
     }
+
+    public function testInsert(string $nombre):bool{
+        if (empty($nombre) || is_null($nombre)) {
+            return false;
+        } else {
+            $entidad = $this->findOneBy(['nombre'=>$nombre]);
+            if (empty($entidad))
+                return false;
+            else {
+                return true;
+            }
+        }
+    }
+
+    public function testUpdate(Productos $producto):bool{
+        if (empty($producto) || is_null($producto)) {
+            return false;
+        } else {
+            $entidad = $this->find($producto);
+            if (empty($entidad))
+                return false;
+            else {
+                return true;
+            }
+        }
+    }
+
 
 
 

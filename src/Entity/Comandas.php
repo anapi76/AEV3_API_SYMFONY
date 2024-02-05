@@ -27,7 +27,7 @@ class Comandas
     private ?string $detalles = null;
 
     #[ORM\Column(options: ['default' => true])]
-    private ?bool $estado = null;
+    private ?bool $estado = true;
 
     #[ORM\ManyToOne(inversedBy: 'comandas')]
     #[ORM\JoinColumn(name: 'idMesa', referencedColumnName: 'idMesa',nullable: false)]

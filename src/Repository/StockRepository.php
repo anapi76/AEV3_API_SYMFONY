@@ -2,7 +2,9 @@
 
 namespace App\Repository;
 
+use App\Entity\Productos;
 use App\Entity\Stock;
+use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -21,33 +23,169 @@ class StockRepository extends ServiceEntityRepository
         parent::__construct($registry, Stock::class);
     }
 
-/*     public function stockProductoJSON(int $id):mixed{
-        $stockProducto=$this->findBy()
+    public function stockProductoJSON(Productos $producto): mixed
+    {
+        $stockProducto = $this->findBy(['producto' => $producto]);
+        $json = array();
+        foreach ($stockProducto as $stock) {
+            $json[] = [
+                'FECHA' => $stock->getFecha()->format('d-m-Y H:i:s'),
+                'CANTIDAD' => $stock->getCantidad()
+            ];
+        }
+        return $json;
+    }
 
-    } */
+    public function stockFechaJSON(DateTime $fecha, array $productos): mixed
+    {
+        $json = array();
+        foreach ($productos as $producto) {
+            $arrayStock = $this->findBy(['producto' => $producto]);
+            if (!empty($arrayStock)) {
+                $ultimoStock = null;
+                foreach ($arrayStock as $stock) {
+                    $stockFecha = $stock->getFecha();
+                    if ($stockFecha <= $fecha) {
+                        if (is_null($ultimoStock) || $stockFecha > $ultimoStock->getFecha()) {
+                            $ultimoStock = $stock;
+                        }
+                    }
+                }
+                if (!is_null($ultimoStock)) {
+                    $json[] = [
+                        'PRODUCTO' => $stock->getProducto()->getNombre(),
+                        'FECHA' => $stock->getFecha()->format('d-m-Y H:i:s'),
+                        'CANTIDAD' => $stock->getCantidad()
+                    ];
+                }
+            } else {
+                $json[] = [
+                    'PRODUCTO' => $producto->getNombre(),
+                    'FECHA' => $fecha->format('d-m-Y H:i:s'),
+                    'CANTIDAD' => 0
+                ];
+            }
+        }
+        return $json;
+    }
 
-//    /**
-//     * @return Stock[] Returns an array of Stock objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('s')
-//            ->andWhere('s.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('s.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    public function inventarioJSON(DateTime $fecha, array $productos): mixed
+    {
+        $json = array();
+        foreach ($productos as $producto) {
+            $arrayStock = $this->findBy(['producto' => $producto]);
+            if (!empty($arrayStock)) {
+                $ultimoStock = null;
+                foreach ($arrayStock as $stock) {
+                    $stockFecha = $stock->getFecha();
+                    if ($stockFecha <= $fecha) {
+                        if (is_null($ultimoStock) || $stockFecha > $ultimoStock->getFecha()) {
+                            $ultimoStock = $stock;
+                        }
+                    }
+                }
+                if (!is_null($ultimoStock)) {
+                    $descripcion = (is_null($stock->getProducto()->getDescripcion())) ? '' : $stock->getProducto()->getDescripcion();
+                    $json[] = [
+                        'PRODUCTO' => $stock->getProducto()->getNombre(),
+                        'DESCRIPCION' => $descripcion,
+                        'PRECIO' => $stock->getProducto()->getPrecio() . ' €',
+                        'FECHA' => $stock->getFecha()->format('d-m-Y H:i:s'),
+                        'CANTIDAD' => $stock->getCantidad()
+                    ];
+                }
+            } else {
+                $descripcion = (is_null($producto->getDescripcion())) ? '' : $producto->getDescripcion();
+                $json[] = [
+                    'PRODUCTO' => $producto->getNombre(),
+                    'DESCRIPCION' => $descripcion,
+                    'PRECIO' => $producto->getPrecio() . ' €',
+                    'FECHA' => $fecha->format('d-m-Y H:i:s'),
+                    'CANTIDAD' => 0
+                ];
+            }
+        }
+        return $json;
+    }
 
-//    public function findOneBySomeField($value): ?Stock
-//    {
-//        return $this->createQueryBuilder('s')
-//            ->andWhere('s.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    //Método que devuelve el stock con fecha más reciente del producto que le pasamos
+    public function stockProducto(Productos $producto): ?Stock
+    {
+        $data = $this->findBy(['producto' => $producto], ['fecha' => 'DESC']);
+        if (empty($data)) {
+            $stock = null;
+        } else {
+            $stock = $data[0];
+        }
+        return $stock;
+    }
+
+    public function newStock(float $cantidad, Productos $producto): Stock
+    {
+        $newStock = new Stock();
+        $newStock->setFecha(new DateTime());
+        $newStock->setProducto($producto);
+        $newStock->setCantidad($cantidad);
+
+        $this->persist($newStock);
+        $this->save(true);
+        return $newStock;
+    }
+
+    //Función para persitir la entidad
+    public function persist(Stock $stock): void
+    {
+        $this->getEntityManager()->persist($stock);
+    }
+
+    //Función para hacer flush 
+    public function save(bool $flush=false): void
+    {
+        try {
+            if($flush){
+                $this->getEntityManager()->flush();
+            }
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
+    public function testInsert(Stock $stock): bool
+    {
+        if (empty($stock) || is_null($stock)) {
+            return false;
+        } else {
+            $entidad = $this->find($stock);
+            if (empty($entidad))
+                return false;
+            else {
+                return true;
+            }
+        }
+    }
+
+    //    /**
+    //     * @return Stock[] Returns an array of Stock objects
+    //     */
+    //    public function findByExampleField($value): array
+    //    {
+    //        return $this->createQueryBuilder('s')
+    //            ->andWhere('s.exampleField = :val')
+    //            ->setParameter('val', $value)
+    //            ->orderBy('s.id', 'ASC')
+    //            ->setMaxResults(10)
+    //            ->getQuery()
+    //            ->getResult()
+    //        ;
+    //    }
+
+    //    public function findOneBySomeField($value): ?Stock
+    //    {
+    //        return $this->createQueryBuilder('s')
+    //            ->andWhere('s.exampleField = :val')
+    //            ->setParameter('val', $value)
+    //            ->getQuery()
+    //            ->getOneOrNullResult()
+    //        ;
+    //    }
 }

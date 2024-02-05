@@ -28,15 +28,27 @@ class PedidosRepository extends ServiceEntityRepository
     }
 
     //Función para hacer flush 
-    public function save(bool $flush=false): bool
+    public function save(bool $flush=false): void
     {
         try {
             if($flush){
                 $this->getEntityManager()->flush();
             }
-            return true;
         } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
+    public function testInsert(Pedidos $pedido):bool{
+        if (empty($pedido) || is_null($pedido)) {
             return false;
+        } else {
+            $entidad = $this->find($pedido);
+            if (empty($entidad))
+                return false;
+            else {
+                return true;
+            }
         }
     }
 

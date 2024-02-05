@@ -57,7 +57,8 @@ class ProveedoresController extends AbstractController
             $telefono = (isset($data->telefono) && !empty($data->telefono)) ? $data->telefono : null;
             $email = (isset($data->email) && !empty($data->email)) ? $data->email : null;
             $contacto = (isset($data->contacto) && !empty($data->contacto)) ? $data->contacto : null;
-            if ($this->proveedoresRepository->new($data->nombre, $data->cif, $data->direccion, $telefono, $email, $contacto, true)) {
+            $this->proveedoresRepository->new($data->nombre, $data->cif, $data->direccion, $telefono, $email, $contacto, true);
+            if ($this->proveedoresRepository->testInsert($data->nombre)) {
                 return new JsonResponse(['status' => 'Proveedor insertado correctamente'], Response::HTTP_CREATED);
             } else {
                 return new JsonResponse(['status' => 'La inserción del proveedor falló'], Response::HTTP_INTERNAL_SERVER_ERROR);
@@ -92,7 +93,8 @@ class ProveedoresController extends AbstractController
             $email = (isset($data->email) && !empty($data->email)) ? $data->email : null;
             $contacto = (isset($data->contacto) && !empty($data->contacto)) ? $data->contacto : null;
             if (!is_null($nombre) || !is_null($cif) || !is_null($direccion) || !is_null($telefono) || !is_null($email) || !is_null($contacto)) {
-                if ($this->proveedoresRepository->update($proveedor, $nombre, $cif, $direccion, $telefono, $email, $contacto, true)) {
+                $this->proveedoresRepository->update($proveedor, $nombre, $cif, $direccion, $telefono, $email, $contacto, true);
+                if ($this->proveedoresRepository->testUpdate($proveedor)) {
                     return new JsonResponse(['status' => 'Proveedor actualizado correctamente'], Response::HTTP_CREATED);
                 } else {
                     return new JsonResponse(['status' => 'La actualización del proveedor falló'], Response::HTTP_INTERNAL_SERVER_ERROR);
@@ -130,7 +132,8 @@ class ProveedoresController extends AbstractController
             $email = (isset($data->email) && !empty($data->email)) ? $data->email : null;
             $contacto = (isset($data->contacto) && !empty($data->contacto)) ? $data->contacto : null;
             if (!is_null($nombre) || !is_null($cif) || !is_null($direccion) || !is_null($telefono) || !is_null($email) || !is_null($contacto)) {
-                if ($this->proveedoresRepository->update($proveedor, $nombre, $cif, $direccion, $telefono, $email, $contacto, true)) {
+                $this->proveedoresRepository->update($proveedor, $nombre, $cif, $direccion, $telefono, $email, $contacto, true);
+                if ($this->proveedoresRepository->testUpdate($proveedor)) {
                     return new JsonResponse(['status' => 'Proveedor actualizado correctamente'], Response::HTTP_CREATED);
                 } else {
                     return new JsonResponse(['status' => 'La actualización del proveedor falló'], Response::HTTP_INTERNAL_SERVER_ERROR);
@@ -157,7 +160,8 @@ class ProveedoresController extends AbstractController
                 return new JsonResponse(['status' => 'El proveedor no existe en la bd'], Response::HTTP_NOT_FOUND);
             }
             if (count($proveedor->getPedidos()) < 1) {
-                if ($this->proveedoresRepository->remove($proveedor, true)) {
+                $this->proveedoresRepository->remove($proveedor, true);
+                if ($this->proveedoresRepository->testDelete($proveedor)) {
                     return new JsonResponse('El proveedor ha sido borrado', Response::HTTP_OK);
                 } else {
                     return new JsonResponse(['status' => 'La eliminación del proveedor falló'], Response::HTTP_INTERNAL_SERVER_ERROR);

@@ -19,7 +19,7 @@ class LineasComandas
     private ?string $cantidad = null;
 
     #[ORM\Column(options:['default'=>false])]
-    private ?bool $entregado = null;
+    private ?bool $entregado = false;
 
     #[ORM\ManyToOne(inversedBy: 'lineasComandas')]
     #[ORM\JoinColumn(name: 'idComanda', referencedColumnName: 'idComanda',nullable: false)]

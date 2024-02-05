@@ -64,7 +64,7 @@ class ProveedoresRepository extends ServiceEntityRepository
     }
 
     //método que recibe los parámetro para añadir un proveedor nuevo a la bd
-    public function new(string $nombre, string $cif, string $direccion, ?int $telefono, ?string $email, ?string $contacto, bool $flush): bool
+    public function new(string $nombre, string $cif, string $direccion, ?int $telefono, ?string $email, ?string $contacto, bool $flush): void
     {
         try {
             $proveedor = new Proveedores();
@@ -74,18 +74,14 @@ class ProveedoresRepository extends ServiceEntityRepository
             if (!is_null($telefono)) $proveedor->setTelefono($telefono);
             if (!is_null($email)) $proveedor->setEmail($email);
             if (!is_null($contacto)) $proveedor->setContacto($contacto);
-            if($this->save($proveedor, $flush)){
-                return true;
-            }else{
-                return false;  
-            }
+            $this->save($proveedor, $flush);
         } catch (\Exception $e) {
             throw $e;
         }
     }
 
     //método que recibe lso parámetros para actualizar un proveedor de la bd
-    public function update(Proveedores $proveedor, ?string $nuevoNombre, ?string $cif, ?string $direccion, ?int $telefono, ?string $email, ?string $contacto, bool $flush): bool
+    public function update(Proveedores $proveedor, ?string $nuevoNombre, ?string $cif, ?string $direccion, ?int $telefono, ?string $email, ?string $contacto, bool $flush): void
     {
         try {
             if (!is_null($nuevoNombre)) $proveedor->setNombre($nuevoNombre);
@@ -94,41 +90,77 @@ class ProveedoresRepository extends ServiceEntityRepository
             if (!is_null($telefono)) $proveedor->setTelefono($telefono);
             if (!is_null($email)) $proveedor->setEmail($email);
             if (!is_null($contacto)) $proveedor->setContacto($contacto);
-            if($this->save($proveedor, $flush)){
-                return true;
-            }else{
-                return false;  
-            }
+            $this->save($proveedor, $flush);
         } catch (\Exception $e) {
             throw $e;
         }
     }
 
     //método para borrar un proveedor de la bd
-    public function remove(Proveedores $proveedor, bool $flush = false): bool
+    public function remove(Proveedores $proveedor, bool $flush = false): void
     {
         try {
             $this->getEntityManager()->remove($proveedor);
             if ($flush) {
                 $this->getEntityManager()->flush();
             }
-            return true;
         } catch (\Exception $e) {
-            return false;
+            throw $e;
         }
     }
 
     //método para persistir y flushear los datos en la bd
-    public function save(Proveedores $proveedor, bool $flush = false): bool
+    public function save(Proveedores $proveedor, bool $flush = false): void
     {
         try {
             $this->getEntityManager()->persist($proveedor);
             if ($flush) {
                 $this->getEntityManager()->flush();
             }
-            return true;
         } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
+    public function testInsert(string $nombre): bool
+    {
+        if (empty($nombre) || is_null($nombre)) {
             return false;
+        } else {
+            $entidad = $this->findOneBy(['nombre' => $nombre]);
+            if (empty($entidad))
+                return false;
+            else {
+                return true;
+            }
+        }
+    }
+
+    public function testUpdate(Proveedores $proveedor): bool
+    {
+        if (empty($proveedor) || is_null($proveedor)) {
+            return false;
+        } else {
+            $entidad = $this->find($proveedor);
+            if (empty($entidad))
+                return false;
+            else {
+                return true;
+            }
+        }
+    }
+
+    public function testDelete(Proveedores $proveedor): bool
+    {
+        if (empty($proveedor) || is_null($proveedor)) {
+            return false;
+        } else {
+            $entidad = $this->find($proveedor);
+            if (empty($entidad))
+                return true;
+            else {
+                return false;
+            }
         }
     }
 

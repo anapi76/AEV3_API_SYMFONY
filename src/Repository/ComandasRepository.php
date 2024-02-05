@@ -21,6 +21,38 @@ class ComandasRepository extends ServiceEntityRepository
         parent::__construct($registry, Comandas::class);
     }
 
+    //Función para persitir la entidad
+    public function persist(Comandas $comanda): void
+    {
+        $this->getEntityManager()->persist($comanda);
+    }
+
+    //Función para hacer flush 
+    public function save(bool $flush=false): void
+    {
+        try {
+            if($flush){
+                $this->getEntityManager()->flush();
+            }
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
+    public function testInsert(Comandas $comanda):bool{
+        if (empty($comanda) || is_null($comanda)) {
+            return false;
+        } else {
+            $entidad = $this->find($comanda);
+            if (empty($entidad))
+                return false;
+            else {
+                return true;
+            }
+        }
+    }
+
+
 //    /**
 //     * @return Comandas[] Returns an array of Comandas objects
 //     */

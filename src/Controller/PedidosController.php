@@ -82,7 +82,8 @@ class PedidosController extends AbstractController
                 $cont++;
             }
             if ($cont > 0) {
-                if ($pedidosRepository->save(true)) {
+                $pedidosRepository->save(true);
+                if ($pedidosRepository->testInsert($pedido)) {
                     return new JsonResponse(['status' => 'Pedido creado correctamente'], Response::HTTP_CREATED);
                 } else {
                     return new JsonResponse(['status' => 'La creación del pedido falló'], Response::HTTP_INTERNAL_SERVER_ERROR);

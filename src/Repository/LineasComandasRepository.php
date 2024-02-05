@@ -21,28 +21,45 @@ class LineasComandasRepository extends ServiceEntityRepository
         parent::__construct($registry, LineasComandas::class);
     }
 
-//    /**
-//     * @return LineasComandas[] Returns an array of LineasComandas objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('l')
-//            ->andWhere('l.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('l.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    public function persist(LineasComandas $lineasComandas): void
+    {
+        $this->getEntityManager()->persist($lineasComandas);
+    }
 
-//    public function findOneBySomeField($value): ?LineasComandas
-//    {
-//        return $this->createQueryBuilder('l')
-//            ->andWhere('l.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    //Función para hacer flush 
+    public function save(bool $flush = false): void
+    {
+        try {
+            if ($flush) {
+                $this->getEntityManager()->flush();
+            }
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
+    //    /**
+    //     * @return LineasComandas[] Returns an array of LineasComandas objects
+    //     */
+    //    public function findByExampleField($value): array
+    //    {
+    //        return $this->createQueryBuilder('l')
+    //            ->andWhere('l.exampleField = :val')
+    //            ->setParameter('val', $value)
+    //            ->orderBy('l.id', 'ASC')
+    //            ->setMaxResults(10)
+    //            ->getQuery()
+    //            ->getResult()
+    //        ;
+    //    }
+
+    //    public function findOneBySomeField($value): ?LineasComandas
+    //    {
+    //        return $this->createQueryBuilder('l')
+    //            ->andWhere('l.exampleField = :val')
+    //            ->setParameter('val', $value)
+    //            ->getQuery()
+    //            ->getOneOrNullResult()
+    //        ;
+    //    }
 }
