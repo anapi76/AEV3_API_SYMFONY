@@ -12,6 +12,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class TicketsController extends AbstractController
 {
+    //método para crear un ticket a partir del id de la comanda
     #[Route('/tickets/{id}', name: 'app_tickets', methods: 'POST')]
     public function add(?int $id = null, ComandasRepository $comandasRepository, TicketsRepository $ticketRepository): JsonResponse
     {

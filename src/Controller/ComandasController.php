@@ -8,7 +8,6 @@ use App\Repository\ComandasRepository;
 use App\Repository\LineasComandasRepository;
 use App\Repository\MesaRepository;
 use App\Repository\ProductosRepository;
-use DateTime;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -18,7 +17,6 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class ComandasController extends AbstractController
 {
-
     private ProductosRepository $productosRepository;
     private ComandasRepository $comandasRepository;
     private LineasComandasRepository $lineasComandasRepository;
@@ -32,6 +30,7 @@ class ComandasController extends AbstractController
         $this->mesaRepository = $mesaRepository;
     }
 
+    //método para crear una nueva comanda
     #[Route('/comandas', name: 'app_comandas_new', methods: ['POST'])]
     public function add(Request $request): JsonResponse
     {
@@ -46,9 +45,9 @@ class ComandasController extends AbstractController
             $comanda = new Comandas();
             $fecha = date_create_from_format("d/m/Y H:i:s", ($data->fecha));
             $comanda->setFecha($fecha);
-            //Busco la mesa con el id que hemos recibido y la introduzco
-            $mesa = $this->mesaRepository->find($data->mesa);
-            if(is_null($mesa)){
+            //Busco la mesa por el nombre que hemos recibido y la introduzco
+            $mesa = $this->mesaRepository->findOneBy(["nombre" => $data->mesa]);
+            if (is_null($mesa)) {
                 return new JsonResponse(['status' => "La mesa no existe en la bd"], Response::HTTP_NOT_FOUND);
             }
             if ($data->comensales > $mesa->getComensales()) {
@@ -70,7 +69,7 @@ class ComandasController extends AbstractController
                     return new JsonResponse(['status' => 'Faltan parámetros'], Response::HTTP_BAD_REQUEST);
                 }
                 $lineasComanda = new LineasComandas();
-                $producto = $this->productosRepository->find($linea->producto);
+                $producto = $this->productosRepository->findOneBy(["nombre" => $linea->producto]);
                 if (is_null($producto)) {
                     return new JsonResponse(['status' => "El producto no existe en la bd"], Response::HTTP_NOT_FOUND);
                 }
@@ -84,7 +83,7 @@ class ComandasController extends AbstractController
             if ($cont > 0) {
                 $this->comandasRepository->save(true);
                 if ($this->comandasRepository->testInsert($comanda)) {
-                    return new JsonResponse(['status' => "La comanda ".$comanda->getId()." se ha creado correctamente"], Response::HTTP_CREATED);
+                    return new JsonResponse(['status' => "La comanda " . $comanda->getId() . " se ha creado correctamente"], Response::HTTP_CREATED);
                 } else {
                     return new JsonResponse(['status' => 'La creación de la comanda falló'], Response::HTTP_INTERNAL_SERVER_ERROR);
                 }
@@ -97,6 +96,7 @@ class ComandasController extends AbstractController
         }
     }
 
+    //método para editar una comanda a partir de su id
     #[Route('/comandas/{id}', name: 'app_comandas_update', methods: ['PUT'])]
     public function edit(Request $request, int $id): JsonResponse
     {
@@ -114,9 +114,9 @@ class ComandasController extends AbstractController
                 $comanda->setFecha($fecha);
             }
             if (isset($data->mesa) && !empty($data->mesa)) {
-                $mesa = $this->mesaRepository->find($data->mesa);
+                $mesa = $this->mesaRepository->findOneBy(["nombre" => $data->mesa]);
             }
-            if(is_null($mesa)){
+            if (is_null($mesa)) {
                 return new JsonResponse(['status' => "La mesa no existe en la bd"], Response::HTTP_NOT_FOUND);
             }
             if ($data->comensales > $mesa->getComensales()) {
@@ -140,7 +140,7 @@ class ComandasController extends AbstractController
                     $lineasComanda->setComanda($comanda);
                 }
                 if (isset($linea->producto) && !empty($linea->producto)) {
-                    $producto = $this->productosRepository->find($linea->producto);
+                    $producto = $this->productosRepository->findOneBy(["nombre" => $linea->producto]);
                     if (is_null($producto)) {
                         return new JsonResponse(['status' => "El producto no existe en la bd"], Response::HTTP_NOT_FOUND);
                     }
@@ -151,9 +151,9 @@ class ComandasController extends AbstractController
                 }
                 $this->lineasComandasRepository->persist($lineasComanda);
             }
-           $this->comandasRepository->save(true);
+            $this->comandasRepository->save(true);
             if ($this->comandasRepository->testInsert($comanda)) {
-                return new JsonResponse(['status' => "La comanda ".$comanda->getId()." se ha actualizado correctamente"], Response::HTTP_CREATED);
+                return new JsonResponse(['status' => "La comanda " . $comanda->getId() . " se ha actualizado correctamente"], Response::HTTP_CREATED);
             } else {
                 return new JsonResponse(['status' => 'La actualización de la comanda falló'], Response::HTTP_INTERNAL_SERVER_ERROR);
             }

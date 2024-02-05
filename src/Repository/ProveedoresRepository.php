@@ -122,6 +122,7 @@ class ProveedoresRepository extends ServiceEntityRepository
         }
     }
 
+    //método para comprobar si se ha insertado el proveedor
     public function testInsert(string $nombre): bool
     {
         if (empty($nombre) || is_null($nombre)) {
@@ -150,19 +151,16 @@ class ProveedoresRepository extends ServiceEntityRepository
         }
     }
 
-    public function testDelete(Proveedores $proveedor): bool
+    public function testDelete(int $id): bool
     {
-        if (empty($proveedor) || is_null($proveedor)) {
-            return false;
+        $entidad = $this->find($id);
+        if (is_null($entidad)) {
+            return true;
         } else {
-            $entidad = $this->find($proveedor);
-            if (empty($entidad))
-                return true;
-            else {
-                return false;
-            }
+            return false;
         }
     }
+
 
     //    /**
     //     * @return Proveedores[] Returns an array of Proveedores objects

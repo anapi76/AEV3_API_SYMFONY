@@ -57,7 +57,6 @@ class ProductosController extends AbstractController
     public function add(Request $request): JsonResponse
     {
         try {
-            // Decodifico el contenido de la petición http
             $data = json_decode($request->getContent());
             if (is_null($data)) {
                 return new JsonResponse(['status' => 'Error al decodificar el archivo json'], Response::HTTP_BAD_REQUEST);
@@ -84,12 +83,11 @@ class ProductosController extends AbstractController
         }
     }
 
-    //método para actualizar un producto
+    //método para actualizar un producto a partir de su id
     #[Route('/productos/{id}', name: 'app_producto_edit', methods: ['PUT'])]
     public function edit(Request $request, ?int $id = null): JsonResponse
     {
         try {
-            // Decodifico el contenido de la petición http
             $data = json_decode($request->getContent());
             if (is_null($data)) {
                 return new JsonResponse(['status' => 'Error al decodificar el archivo json'], Response::HTTP_BAD_REQUEST);

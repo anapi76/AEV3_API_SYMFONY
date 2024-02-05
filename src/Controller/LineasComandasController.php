@@ -13,6 +13,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class LineasComandasController extends AbstractController
 {
+    //método para cambiar el estado de una línea comanda, de la comanda y generar un stock nuevo
     #[Route('/entregadaLineaComanda/{id}', name: 'app_lineas_comandas_update', methods: ['PATCH'])]
     public function edit(int $id, LineasComandasRepository $lineasComandasRepository, StockRepository $stockRepository, ComandasRepository $comandasRepository): JsonResponse
     {

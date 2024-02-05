@@ -46,7 +46,6 @@ class ProveedoresController extends AbstractController
     public function add(Request $request): JsonResponse
     {
         try {
-            // Decodifico el contenido de la petición http
             $data = json_decode($request->getContent());
             if (is_null($data)) {
                 return new JsonResponse(['status' => 'Error al decodificar el archivo json'], Response::HTTP_BAD_REQUEST);
@@ -77,12 +76,11 @@ class ProveedoresController extends AbstractController
         }
     }
 
-    //método para modificar un proveedor con diferentes métodos por id o por su nombre
+    //método para modificar un proveedor con a partir de su nombre
     #[Route('/proveedor/{nombre}', name: 'app_proveedor_edit_ByName', methods: ['PUT'])]
     public function editByNombre(Request $request, ?string $nombre = null): JsonResponse
     {
         try {
-            // Decodifico el contenido de la petición http
             $data = json_decode($request->getContent());
             if (is_null($data)) {
                 return new JsonResponse(['status' => 'Error al decodificar el archivo json'], Response::HTTP_BAD_REQUEST);
@@ -116,12 +114,11 @@ class ProveedoresController extends AbstractController
         }
     }
 
-    //método para modificar un proveedor con diferentes métodos por id o por su nombre
+    //método para modificar un proveedor a partir de su id
     #[Route('/proveedor/{id}', name: 'app_proveedor_edit_ById', methods: ['PATCH'])]
     public function editById(Request $request, ?int $id = null): JsonResponse
     {
         try {
-            // Decodifico el contenido de la petición http
             $data = json_decode($request->getContent());
             if (is_null($data)) {
                 return new JsonResponse(['status' => 'Error al decodificar el archivo json'], Response::HTTP_BAD_REQUEST);
@@ -155,7 +152,7 @@ class ProveedoresController extends AbstractController
         }
     }
 
-    //método para borrar un proveedor
+    //método para borrar un proveedor a partir de su id
     #[Route('/proveedor/{id}', name: 'app_proveedor_delete', methods: ['DELETE'])]
     public function delete(?int $id = null): JsonResponse
     {
@@ -169,7 +166,7 @@ class ProveedoresController extends AbstractController
             }
             if (count($proveedor->getPedidos()) < 1) {
                 $this->proveedoresRepository->remove($proveedor, true);
-                if ($this->proveedoresRepository->testDelete($proveedor)) {
+                if ($this->proveedoresRepository->testDelete($id)) {
                     return new JsonResponse('El proveedor ha sido borrado', Response::HTTP_OK);
                 } else {
                     return new JsonResponse(['status' => 'La eliminación del proveedor falló'], Response::HTTP_INTERNAL_SERVER_ERROR);
