@@ -22,7 +22,7 @@ class StockController extends AbstractController
         $this->productosRepository = $productosRepository;
     }
 
-    //método para mostrar el stock a partir del id
+    //método para mostrar el stock a partir del id del producto
     #[Route('/stock/{id}', name: 'app_stock_producto', methods: ['GET'])]
     public function showStock(?int $id = null): JsonResponse
     {

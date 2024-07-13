@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\LineasComandas;
 use App\Repository\ComandasRepository;
 use App\Repository\LineasComandasRepository;
 use App\Repository\StockRepository;
@@ -15,10 +16,9 @@ class LineasComandasController extends AbstractController
 {
     //método para cambiar el estado de una línea comanda, de la comanda y generar un stock nuevo
     #[Route('/entregadaLineaComanda/{id}', name: 'app_lineas_comandas_update', methods: ['PATCH'])]
-    public function edit(int $id, LineasComandasRepository $lineasComandasRepository, StockRepository $stockRepository, ComandasRepository $comandasRepository): JsonResponse
+    public function edit(?LineasComandas $lineaComanda=null, LineasComandasRepository $lineasComandasRepository, StockRepository $stockRepository, ComandasRepository $comandasRepository): JsonResponse
     {
         try {
-            $lineaComanda = $lineasComandasRepository->find($id);
             if (is_null($lineaComanda)) {
                 return new JsonResponse(['status' => "La linea comanda no existe en la bd"], Response::HTTP_NOT_FOUND);
             }

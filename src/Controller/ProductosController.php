@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Productos;
 use App\Repository\ProductosRepository;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -85,17 +86,13 @@ class ProductosController extends AbstractController
 
     //método para actualizar un producto a partir de su id
     #[Route('/productos/{id}', name: 'app_producto_edit', methods: ['PUT'])]
-    public function edit(Request $request, ?int $id = null): JsonResponse
+    public function edit(Request $request, ?Productos $producto = null): JsonResponse
     {
         try {
             $data = json_decode($request->getContent());
             if (is_null($data)) {
                 return new JsonResponse(['status' => 'Error al decodificar el archivo json'], Response::HTTP_BAD_REQUEST);
             }
-            if (is_null($id)) {
-                return new JsonResponse(['status' => 'Faltan parámetros'], Response::HTTP_BAD_REQUEST);
-            }
-            $producto = $this->productosRepository->find($id);
             if (is_null($producto)) {
                 return new JsonResponse(['status' => 'El producto no existe en la bd'], Response::HTTP_NOT_FOUND);
             }

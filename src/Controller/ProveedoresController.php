@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Proveedores;
 use App\Repository\ProveedoresRepository;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -32,13 +33,13 @@ class ProveedoresController extends AbstractController
 
     //método para mostrar un proveedor por su id
     #[Route('/proveedor/{id}', name: 'app_proveedor', methods: ['GET'])]
-    public function show(int $id): JsonResponse
+    public function show(?Proveedores $proveedor=null): JsonResponse
     {
-        $data = $this->proveedoresRepository->proveedorJSON($id);
-        if (is_null($data)) {
+        //$data = $this->proveedoresRepository->proveedorJSON($id);
+        if (is_null($proveedor)) {
             return new JsonResponse(['status' => 'El proveedor no existe en la bd'], Response::HTTP_NOT_FOUND);
         }
-        return new JsonResponse($data, Response::HTTP_OK);
+        return new JsonResponse($proveedor, Response::HTTP_OK);
     }
 
     //método para añadir un proveedor
@@ -61,7 +62,7 @@ class ProveedoresController extends AbstractController
             if(!is_null($proveedor)){
                 return new JsonResponse(['status' => 'CIF incorrecto, ya existe en la bd'], Response::HTTP_BAD_REQUEST);
             }
-            $telefono = (isset($data->telefono) && !empty($data->telefono)) ? $data->telefono : null;
+            $telefono = (isset($data->telefono) && !empty($data->telefono)) ? intval($data->telefono): null;
             $email = (isset($data->email) && !empty($data->email)) ? $data->email : null;
             $contacto = (isset($data->contacto) && !empty($data->contacto)) ? $data->contacto : null;
             $this->proveedoresRepository->new($data->nombre, $data->cif, $data->direccion, $telefono, $email, $contacto, true);
@@ -95,7 +96,7 @@ class ProveedoresController extends AbstractController
             $nombre = isset($data->nombre) && !empty($data->nombre) ? $data->nombre : null;
             $cif = (isset($data->cif) && !empty($data->cif)) ? $data->cif : null;
             $direccion = (isset($data->direccion) && !empty($data->direccion)) ? $data->direccion : null;
-            $telefono = (isset($data->telefono) && !empty($data->telefono)) ? $data->telefono : null;
+            $telefono = (isset($data->telefono) && !empty($data->telefono)) ? intval($data->telefono) : null;
             $email = (isset($data->email) && !empty($data->email)) ? $data->email : null;
             $contacto = (isset($data->contacto) && !empty($data->contacto)) ? $data->contacto : null;
             if (!is_null($nombre) || !is_null($cif) || !is_null($direccion) || !is_null($telefono) || !is_null($email) || !is_null($contacto)) {
@@ -116,24 +117,20 @@ class ProveedoresController extends AbstractController
 
     //método para modificar un proveedor a partir de su id
     #[Route('/proveedor/{id}', name: 'app_proveedor_edit_ById', methods: ['PATCH'])]
-    public function editById(Request $request, ?int $id = null): JsonResponse
+    public function editById(Request $request, ?Proveedores $proveedor = null): JsonResponse
     {
         try {
             $data = json_decode($request->getContent());
             if (is_null($data)) {
                 return new JsonResponse(['status' => 'Error al decodificar el archivo json'], Response::HTTP_BAD_REQUEST);
             }
-            if ((is_null($id))) {
-                return new JsonResponse(['status' => 'Faltan parámetros'], Response::HTTP_BAD_REQUEST);
-            }
-            $proveedor = $this->proveedoresRepository->find($id);
             if (is_null($proveedor)) {
                 return new JsonResponse(['status' => 'El proveedor no existe en la bd'],  Response::HTTP_NOT_FOUND);
             }
             $nombre = isset($data->nombre) && !empty($data->nombre) ? $data->nombre : null;
             $cif = (isset($data->cif) && !empty($data->cif)) ? $data->cif : null;
             $direccion = (isset($data->direccion) && !empty($data->direccion)) ? $data->direccion : null;
-            $telefono = (isset($data->telefono) && !empty($data->telefono)) ? $data->telefono : null;
+            $telefono = (isset($data->telefono) && !empty($data->telefono)) ? intval($data->telefono) : null;
             $email = (isset($data->email) && !empty($data->email)) ? $data->email : null;
             $contacto = (isset($data->contacto) && !empty($data->contacto)) ? $data->contacto : null;
             if (!is_null($nombre) || !is_null($cif) || !is_null($direccion) || !is_null($telefono) || !is_null($email) || !is_null($contacto)) {
@@ -154,19 +151,19 @@ class ProveedoresController extends AbstractController
 
     //método para borrar un proveedor a partir de su id
     #[Route('/proveedor/{id}', name: 'app_proveedor_delete', methods: ['DELETE'])]
-    public function delete(?int $id = null): JsonResponse
+    public function delete(?Proveedores $proveedor = null): JsonResponse
     {
         try {
-            if (is_null($id)) {
+            if (is_null($proveedor)) {
                 return new JsonResponse(['status' => 'Faltan parámetros'], Response::HTTP_BAD_REQUEST);
             }
-            $proveedor = $this->proveedoresRepository->find($id);
+            $proveedor = $this->proveedoresRepository->find($proveedor);
             if (is_null($proveedor)) {
                 return new JsonResponse(['status' => 'El proveedor no existe en la bd'], Response::HTTP_NOT_FOUND);
             }
             if (count($proveedor->getPedidos()) < 1) {
                 $this->proveedoresRepository->remove($proveedor, true);
-                if ($this->proveedoresRepository->testDelete($id)) {
+                if ($this->proveedoresRepository->testDelete($proveedor)) {
                     return new JsonResponse('El proveedor ha sido borrado', Response::HTTP_OK);
                 } else {
                     return new JsonResponse(['status' => 'La eliminación del proveedor falló'], Response::HTTP_INTERNAL_SERVER_ERROR);

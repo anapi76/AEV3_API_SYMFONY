@@ -92,7 +92,7 @@ class ProductosRepository extends ServiceEntityRepository
         if (empty($nombre) || is_null($nombre)) {
             return false;
         } else {
-            $entidad = $this->findOneBy(['nombre'=>$nombre]);
+            $entidad = $this->findOneBy(['username'=>$nombre]);
             if (empty($entidad))
                 return false;
             else {

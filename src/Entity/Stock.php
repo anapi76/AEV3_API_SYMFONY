@@ -19,7 +19,7 @@ class Stock
     private ?\DateTimeInterface $fecha = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 8, scale: 2, options: ['default' => 0.0])]
-    private ?string $cantidad = null;
+    private ?float $cantidad = 0.0;
 
     #[ORM\ManyToOne(inversedBy: 'stocks')]
     #[ORM\JoinColumn(name: 'id_producto', referencedColumnName: 'idProducto', nullable: false)]
@@ -42,12 +42,12 @@ class Stock
         return $this;
     }
 
-    public function getCantidad(): ?string
+    public function getCantidad(): ?float
     {
         return $this->cantidad;
     }
 
-    public function setCantidad(string $cantidad): static
+    public function setCantidad(float $cantidad): static
     {
         $this->cantidad = $cantidad;
 

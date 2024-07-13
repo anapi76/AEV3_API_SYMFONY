@@ -151,9 +151,9 @@ class ProveedoresRepository extends ServiceEntityRepository
         }
     }
 
-    public function testDelete(int $id): bool
+    public function testDelete(Proveedores $proveedor): bool
     {
-        $entidad = $this->find($id);
+        $entidad = $this->find($proveedor);
         if (is_null($entidad)) {
             return true;
         } else {

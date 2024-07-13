@@ -98,14 +98,13 @@ class ComandasController extends AbstractController
 
     //método para editar una comanda a partir de su id
     #[Route('/comandas/{id}', name: 'app_comandas_update', methods: ['PUT'])]
-    public function edit(Request $request, int $id): JsonResponse
+    public function edit(Request $request, ?Comandas $comanda=null): JsonResponse
     {
         try {
             $data = json_decode($request->getContent());
             if (is_null($data)) {
                 return new JsonResponse(['status' => 'Error al decodificar el archivo json'], Response::HTTP_BAD_REQUEST);
             }
-            $comanda = $this->comandasRepository->find($id);
             if (is_null($comanda)) {
                 return new JsonResponse(['status' => "La comanda no existe en la bd"], Response::HTTP_NOT_FOUND);
             }

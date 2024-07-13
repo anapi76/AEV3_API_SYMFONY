@@ -24,7 +24,7 @@ class Productos
     private ?string $descripcion = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 8, scale: 2,options: ['default' => 0.0])]
-    private ?float $precio = null;
+    private ?float $precio = 0.0;
 
     #[ORM\OneToMany(mappedBy: 'producto', targetEntity: LineasPedidos::class)]
     private Collection $lineasPedidos;
@@ -71,12 +71,12 @@ class Productos
         return $this;
     }
 
-    public function getPrecio(): ?string
+    public function getPrecio(): ?float
     {
         return $this->precio;
     }
 
-    public function setPrecio(string $precio): static
+    public function setPrecio(float $precio): static
     {
         $this->precio = $precio;
 
